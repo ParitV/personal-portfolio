@@ -9,26 +9,31 @@ function About() {
       </p>
 
       <h2>Experience</h2>
-      <ul className="stacked-list">
-        <li>
+      <ul>
+        <li className="border-b border-stone py-4">
           <strong>Job Title</strong> — Company Name
           <br />
-          <span className="muted">Jan 2023 – Present</span>
-          <p>One or two lines describing your role and impact.</p>
+          <span className="text-sm text-wood">Jan 2023 – Present</span>
+          <p className="mt-2">One or two lines describing your role and impact.</p>
         </li>
-        <li>
+        <li className="border-b border-stone py-4">
           <strong>Job Title</strong> — Company Name
           <br />
-          <span className="muted">Jan 2021 – Dec 2022</span>
-          <p>One or two lines describing your role and impact.</p>
+          <span className="text-sm text-wood">Jan 2021 – Dec 2022</span>
+          <p className="mt-2">One or two lines describing your role and impact.</p>
         </li>
       </ul>
 
       <h2>Skills</h2>
-      <ul className="tag-list">
+      <ul className="flex flex-wrap gap-2">
         {['TypeScript', 'React', 'Node.js', 'Python', 'SQL', 'Git'].map(
           (skill) => (
-            <li key={skill}>{skill}</li>
+            <li
+              key={skill}
+              className="rounded-full bg-sage/10 px-3 py-1 text-xs text-sage"
+            >
+              {skill}
+            </li>
           ),
         )}
       </ul>

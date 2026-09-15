@@ -1,23 +1,40 @@
 function Footer() {
   const year = new Date().getFullYear()
   return (
-    <footer className="footer">
-      <p>© {year} Your Name. Built with React + Vite.</p>
-      <ul className="footer-links">
-        <li>
-          <a href="https://github.com/your-username" target="_blank" rel="noreferrer">
-            GitHub
-          </a>
-        </li>
-        <li>
-          <a href="https://www.linkedin.com/in/your-username" target="_blank" rel="noreferrer">
-            LinkedIn
-          </a>
-        </li>
-        <li>
-          <a href="mailto:you@example.com">Email</a>
-        </li>
-      </ul>
+    <footer className="border-t border-stone">
+      <div className="mx-auto max-w-3xl px-6 py-8 text-center text-sm">
+        <p className="text-wood">© {year} Your Name. Built with React + Vite.</p>
+        <ul className="mt-2 flex justify-center gap-6">
+          <li>
+            <a
+              href="https://github.com/your-username"
+              target="_blank"
+              rel="noreferrer"
+              className="text-wood transition-colors hover:text-ink"
+            >
+              GitHub
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.linkedin.com/in/your-username"
+              target="_blank"
+              rel="noreferrer"
+              className="text-wood transition-colors hover:text-ink"
+            >
+              LinkedIn
+            </a>
+          </li>
+          <li>
+            <a
+              href="mailto:you@example.com"
+              className="text-wood transition-colors hover:text-ink"
+            >
+              Email
+            </a>
+          </li>
+        </ul>
+      </div>
     </footer>
   )
 }

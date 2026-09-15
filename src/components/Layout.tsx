@@ -4,9 +4,9 @@ import Footer from './Footer'
 
 function Layout() {
   return (
-    <div className="page">
+    <div className="flex min-h-svh flex-col">
       <Nav />
-      <main className="content">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
         <Outlet />
       </main>
       <Footer />

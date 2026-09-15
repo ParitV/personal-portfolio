@@ -1,98 +1,28 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --bg-alt: #f7f6f9;
-  --border: #e5e4e7;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import "tailwindcss";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+@theme {
+  --color-paper: #F2ECE1;
+  --color-stone: #DCD3C3;
+  --color-wood: #8B6F52;
+  --color-wood-dark: #5C4A38;
+  --color-ink: #2B2A26;
+  --color-sage: #7C8C6D;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Karla", ui-sans-serif, system-ui, sans-serif;
+}
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+@layer base {
+  * {
+    box-sizing: border-box;
   }
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --bg-alt: #1c1d24;
-    --border: #2e303a;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  body {
+    @apply bg-paper text-ink font-sans;
+    margin: 0;
   }
-}
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 48px;
-  letter-spacing: -1.44px;
-  margin: 0 0 16px;
-  @media (max-width: 1024px) {
-    font-size: 32px;
-    margin: 0 0 12px;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
   }
-}
-
-h2 {
-  font-size: 22px;
-  line-height: 118%;
-  letter-spacing: -0.22px;
-  margin: 32px 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 19px;
-  }
-}
-
-p {
-  margin: 0 0 16px;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-ul {
-  padding: 0;
-  margin: 0;
-  list-style: none;
 }
