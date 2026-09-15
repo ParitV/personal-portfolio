@@ -12,7 +12,7 @@ function Nav() {
     <header className="border-b border-stone">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-6">
         <NavLink to="/" className="font-serif text-lg text-ink" end>
-          Your Name
+          Parit Vorasaran
         </NavLink>
         <nav>
           <ul className="flex gap-8 text-sm">

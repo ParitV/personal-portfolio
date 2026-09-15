@@ -1,24 +1,35 @@
 import { Link } from 'react-router-dom'
 
+const quietLinks = [
+  { to: '/about', label: 'About' },
+  { to: '/projects', label: 'Projects' },
+  { to: '/contact', label: 'Contact' },
+]
+
 function Home() {
   return (
     <section className="py-16">
-      <p className="text-sm font-medium text-sage">Hi, I'm</p>
-      <h1 className="mt-2 text-5xl">Your Name</h1>
-      <p className="mt-4 max-w-md text-lg text-wood">
-        A short tagline about what you do — e.g. software engineer building
-        thoughtful, reliable products.
+      <h1 className="text-5xl">Parit Vorasaran</h1>
+      <p className="mt-3 text-lg text-wood-dark">
+        Cyber Security Analyst &amp; Application Security Engineer, Software
+        Engineer
       </p>
-      <div className="mt-8 flex gap-4">
-        <Link to="/projects" className="bg-ink px-5 py-2.5 text-paper">
-          View Projects
-        </Link>
-        <Link
-          to="/contact"
-          className="border border-wood-dark px-5 py-2.5 text-ink hover:bg-stone/40"
-        >
-          Get in Touch
-        </Link>
+      <p className="mt-4 max-w-xl text-lg text-wood">
+        I break, defend, and build software — turning security insight into
+        better engineering.
+      </p>
+      <div className="mt-8 flex items-center gap-4 text-sm">
+        {quietLinks.map((link, index) => (
+          <span key={link.to} className="flex items-center gap-4">
+            {index > 0 && <span className="text-stone">·</span>}
+            <Link
+              to={link.to}
+              className="text-wood underline-offset-4 transition-colors hover:text-ink hover:underline"
+            >
+              {link.label}
+            </Link>
+          </span>
+        ))}
       </div>
     </section>
   )

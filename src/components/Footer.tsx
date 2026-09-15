@@ -3,7 +3,7 @@ function Footer() {
   return (
     <footer className="border-t border-stone">
       <div className="mx-auto max-w-3xl px-6 py-8 text-center text-sm">
-        <p className="text-wood">© {year} Your Name. Built with React + Vite.</p>
+        <p className="text-wood">© {year} Parit Vorasaran. Built with React + Vite.</p>
         <ul className="mt-2 flex justify-center gap-6">
           <li>
             <a
