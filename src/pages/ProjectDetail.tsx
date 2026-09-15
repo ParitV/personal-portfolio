@@ -9,9 +9,7 @@ function ProjectDetail() {
     return (
       <section>
         <h1>Project not found</h1>
-        <p className="text-wood">
-          We couldn't find a project with that URL.
-        </p>
+        <p className="text-wood">We couldn't find a project with that URL.</p>
         <Link to="/projects" className="text-ink underline">
           Back to projects
         </Link>
@@ -20,28 +18,46 @@ function ProjectDetail() {
   }
 
   const links = [
-    { label: 'Code', href: project.repoUrl },
     { label: 'Live Demo', href: project.demoUrl },
+    { label: 'Code', href: project.repoUrl },
     { label: 'Docs', href: project.docUrl },
   ].filter((link): link is { label: string; href: string } => Boolean(link.href))
 
+  const linkButtons = (
+    <div className="flex flex-wrap gap-4">
+      {links.map((link) => (
+        <a
+          key={link.label}
+          href={link.href}
+          target="_blank"
+          rel="noreferrer"
+          className="border border-wood-dark px-5 py-2.5 text-ink hover:bg-stone/40"
+        >
+          {link.label}
+        </a>
+      ))}
+    </div>
+  )
+
   return (
     <article>
-      <ul className="flex flex-wrap gap-2">
-        {project.techStack.map((tech) => (
-          <li
-            key={tech}
-            className="rounded-full bg-sage/10 px-3 py-1 text-xs text-sage"
-          >
-            {tech}
-          </li>
-        ))}
-      </ul>
+      <header>
+        <ul className="flex flex-wrap gap-2">
+          {project.techStack.map((tech) => (
+            <li
+              key={tech}
+              className="rounded-full bg-sage/10 px-3 py-1 text-xs text-sage"
+            >
+              {tech}
+            </li>
+          ))}
+        </ul>
+        <h1 className="mt-4">{project.title}</h1>
+        <p className="text-lg text-wood">{project.oneLiner}</p>
+        <div className="mt-6">{linkButtons}</div>
+      </header>
 
-      <h1 className="mt-4">{project.title}</h1>
-      <p className="text-lg text-wood">{project.oneLiner}</p>
-
-      <div className="mt-8 space-y-8">
+      <div className="mt-10 space-y-10">
         <section className="border-t border-stone pt-8">
           <h2>Problem</h2>
           <p>{project.problem}</p>
@@ -51,6 +67,17 @@ function ProjectDetail() {
           <h2>What I Built</h2>
           <p>{project.whatIBuilt}</p>
         </section>
+
+        {project.architectureImage && (
+          <section className="border-t border-stone pt-8">
+            <h2>Architecture</h2>
+            <img
+              src={project.architectureImage}
+              alt={`${project.title} architecture diagram`}
+              className="w-full border border-stone"
+            />
+          </section>
+        )}
 
         <section className="border-t border-stone pt-8">
           <h2>My Role</h2>
@@ -67,19 +94,7 @@ function ProjectDetail() {
         </section>
       </div>
 
-      <div className="mt-10 flex gap-4 border-t border-stone pt-8">
-        {links.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            target="_blank"
-            rel="noreferrer"
-            className="border border-wood-dark px-5 py-2.5 text-ink hover:bg-stone/40"
-          >
-            {link.label}
-          </a>
-        ))}
-      </div>
+      <div className="mt-10 border-t border-stone pt-8">{linkButtons}</div>
     </article>
   )
 }

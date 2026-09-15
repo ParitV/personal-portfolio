@@ -5,17 +5,26 @@ function Projects() {
   return (
     <section>
       <h1>Projects</h1>
-      <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-10 sm:grid-cols-2">
         {projects.map((project) => (
-          <article className="border-b border-stone pb-8" key={project.slug}>
-            <h2>
-              <Link to={`/projects/${project.slug}`} className="hover:text-wood">
-                {project.title}
-              </Link>
-            </h2>
+          <Link
+            to={`/projects/${project.slug}`}
+            key={project.slug}
+            className="group block"
+          >
+            <div className="aspect-video overflow-hidden border border-stone bg-stone/20">
+              {project.coverImage && (
+                <img
+                  src={project.coverImage}
+                  alt={project.title}
+                  className="h-full w-full object-cover"
+                />
+              )}
+            </div>
+            <h2 className="mt-4 group-hover:text-wood">{project.title}</h2>
             <p>{project.oneLiner}</p>
             <ul className="mt-3 flex flex-wrap gap-2">
-              {project.techStack.map((tech) => (
+              {project.techStack.slice(0, 4).map((tech) => (
                 <li
                   key={tech}
                   className="rounded-full bg-sage/10 px-3 py-1 text-xs text-sage"
@@ -24,7 +33,7 @@ function Projects() {
                 </li>
               ))}
             </ul>
-          </article>
+          </Link>
         ))}
       </div>
     </section>
