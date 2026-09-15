@@ -10,49 +10,26 @@ export type Project = {
   repoUrl: string
   demoUrl?: string
   docUrl?: string
+  coverImage?: string
+  architectureImage?: string
 }
 
 export const projects: Project[] = [
   {
-    slug: 'project-one',
-    title: 'Project One',
-    oneLiner: 'Short description of the project, what problem it solves, and the tech used.',
-    techStack: ['React', 'TypeScript'],
-    problem: 'Placeholder description of the problem this project set out to solve.',
-    whatIBuilt: 'Placeholder description of the solution and how it works.',
-    myRole: 'Placeholder description of your role and responsibilities.',
+    slug: 'eight',
+    title: 'Eight',
+    oneLiner:
+      'An automated SAST/DAST security pipeline that scans every pull request and blocks merges on high-severity findings.',
+    techStack: ['CodeQL', 'Semgrep', 'OWASP ZAP', 'GitHub Actions'],
+    problem:
+      'Manual security review does not scale with commit frequency, so vulnerabilities routinely reach production before anyone looks for them. Teams needed a way to catch high-risk issues automatically, in CI, without slowing every PR down with a full audit.',
+    whatIBuilt:
+      "A GitHub Actions pipeline that runs CodeQL and Semgrep for static analysis and an OWASP ZAP baseline scan for dynamic analysis on every pull request, aggregates the findings by severity, and fails the build when High or Critical issues are found. It's also used to scan its own repository.",
+    myRole: 'Sole developer — designed, built, and maintained the entire pipeline end-to-end.',
     keyDecisions: [
-      'Placeholder key decision made during the project.',
-      'Placeholder trade-off and why it was chosen.',
+      'High/Critical findings fail the build, but Medium/Low findings only get reported: a hard gate on every finding would bury real risk in noise and train developers to bypass the check, so only the severities worth blocking a release actually block one.',
+      "OWASP ZAP's baseline scan was used instead of a full active scan: baseline scans are passive and fast enough to run on every PR without risking side effects on the target application, where a full active scan is slower and can mutate state — not something to run unsupervised in CI.",
     ],
-    repoUrl: 'https://github.com/your-username/project-one',
-  },
-  {
-    slug: 'project-two',
-    title: 'Project Two',
-    oneLiner: 'Short description of the project, what problem it solves, and the tech used.',
-    techStack: ['Node.js', 'PostgreSQL'],
-    problem: 'Placeholder description of the problem this project set out to solve.',
-    whatIBuilt: 'Placeholder description of the solution and how it works.',
-    myRole: 'Placeholder description of your role and responsibilities.',
-    keyDecisions: [
-      'Placeholder key decision made during the project.',
-      'Placeholder trade-off and why it was chosen.',
-    ],
-    repoUrl: 'https://github.com/your-username/project-two',
-  },
-  {
-    slug: 'project-three',
-    title: 'Project Three',
-    oneLiner: 'Short description of the project, what problem it solves, and the tech used.',
-    techStack: ['Python', 'Data'],
-    problem: 'Placeholder description of the problem this project set out to solve.',
-    whatIBuilt: 'Placeholder description of the solution and how it works.',
-    myRole: 'Placeholder description of your role and responsibilities.',
-    keyDecisions: [
-      'Placeholder key decision made during the project.',
-      'Placeholder trade-off and why it was chosen.',
-    ],
-    repoUrl: 'https://github.com/your-username/project-three',
+    repoUrl: 'https://github.com/ParitV/Eight',
   },
 ]
