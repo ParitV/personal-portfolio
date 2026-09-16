@@ -30,7 +30,7 @@ function ProjectDetail() {
     const body = demoFrameRef.current?.contentDocument?.body
     if (!body) return
 
-    const updateHeight = () => setDemoHeight(body.scrollHeight)
+    const updateHeight = () => setDemoHeight(body.scrollHeight + 2)
     updateHeight()
     new ResizeObserver(updateHeight).observe(body)
   }
@@ -88,7 +88,8 @@ function ProjectDetail() {
               src={project.demoEmbedUrl}
               title={`${project.title} pipeline live demo`}
               onLoad={handleDemoLoad}
-              style={{ height: demoHeight }}
+              scrolling="no"
+              style={{ height: demoHeight, overflow: 'hidden' }}
               className="w-full rounded"
             />
           </section>
