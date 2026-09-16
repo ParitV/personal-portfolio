@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eight — SAST vs DAST in action</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2ECE1; --stone:#E4DCC9; --stone-line:#D3C7AE;
+    --wood:#8B6F52; --wood-dark:#5C4A38;
+    --ink:#2B2A26; --ink-dim:#6B5F4F; --ink-faint:#9C8F7A;
+    --sage:#7C8C6D; --sage-dark:#63704F; --sage-tint:#E4E9DD;
+    --terracotta:#B5533C; --terracotta-tint:#F1E0D8;
+    --code-bg:#2A2118; --code-text:#EFE7D8; --code-dim:#A89A85;
+    --code-kw:#D8B26E; --code-str:#A8B896; --code-fn:#D98C6D;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Karla', system-ui, sans-serif;
+    padding:1.75rem 1.25rem; min-height:100vh;
+  }
+  .wrap{ max-width:980px; margin:0 auto; }
+
+  header{ margin-bottom:1.1rem; }
+  .brand{ display:flex; align-items:baseline; gap:0.6rem; margin-bottom:0.35rem; }
+  .mark{
+    width:1.9rem; height:1.9rem; border-radius:6px;
+    background:var(--wood-dark); color:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.05rem; flex-shrink:0;
+  }
+  h1{ font-family:'Fraunces', serif; font-size:1.35rem; font-weight:600; margin:0; color:var(--wood-dark); }
+  .tagline{ color:var(--ink-dim); font-size:0.92rem; margin:0; max-width:64ch; line-height:1.5; }
+
+  .tabs{ display:flex; gap:0.5rem; margin:1.1rem 0 1rem; border-bottom:1px solid var(--stone-line); }
+  .tabbtn{
+    padding:0.65rem 1.1rem; background:transparent; border:none; cursor:pointer;
+    font-family:'Karla', sans-serif; font-weight:700; font-size:0.88rem;
+    color:var(--ink-dim); border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .tabbtn.active{ color:var(--wood-dark); border-bottom-color:var(--sage); }
+  .tabbtn:hover:not(.active){ color:var(--ink); }
+  .tabbtn .sub{ font-weight:500; color:var(--ink-faint); }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.1rem; align-items:stretch; }
+  @media (max-width:720px){ .grid{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:var(--stone); border:1px solid var(--stone-line); border-radius:4px;
+    display:flex; flex-direction:column;
+  }
+  .panel-inner{ padding:0.9rem 1rem 1rem; display:flex; flex-direction:column; flex:1; }
+
+  /* --- shared: small tab row for code samples --- */
+  .subtabs{ display:flex; border-bottom:1px solid var(--stone-line); }
+  .subtab{
+    flex:1; padding:0.55rem 0.4rem; text-align:center; font-size:0.74rem;
+    color:var(--ink-dim); cursor:pointer; background:transparent; border:none;
+    font-family:'Karla', sans-serif; font-weight:600; border-bottom:2px solid transparent;
+  }
+  .subtab.active{ color:var(--wood-dark); border-bottom-color:var(--sage); }
+
+  .code-label{ font-size:0.72rem; color:var(--ink-faint); margin:0.7rem 0 0.4rem; font-family:'IBM Plex Mono', monospace; }
+  pre.code{
+    margin:0; font-family:'IBM Plex Mono', monospace; font-size:0.78rem; line-height:1.6;
+    overflow-x:auto; overflow-y:auto; color:var(--code-text); background:var(--code-bg);
+    padding:0.8rem 0.9rem; border-radius:4px; height:172px;
+  }
+  pre.code .flag{ background:rgba(181,83,60,0.28); display:block; margin:0 -0.9rem; padding:0 0.9rem; border-left:2px solid var(--terracotta); }
+  pre.code .kw{ color:var(--code-kw); } pre.code .str{ color:var(--code-str); } pre.code .fn{ color:var(--code-fn); }
+
+  button.run{
+    margin-top:0.75rem; padding:0.65rem 1rem; border-radius:4px; border:none;
+    background:var(--sage); color:var(--paper); font-weight:700; font-size:0.86rem;
+    font-family:'Karla', sans-serif; cursor:pointer; transition:background 0.15s ease;
+  }
+  button.run:disabled{ opacity:0.55; cursor:default; }
+  button.run:hover:not(:disabled){ background:var(--sage-dark); }
+
+  /* --- DAST diagram --- */
+  .diagram{ display:flex; align-items:center; gap:0.5rem; margin-top:0.2rem; }
+  .box{ flex:0 0 auto; width:40%; text-align:center; background:var(--paper); border:1px solid var(--stone-line); border-radius:4px; padding:0.6rem 0.4rem; }
+  .box .name{ font-family:'Fraunces', serif; font-weight:600; font-size:0.88rem; color:var(--wood-dark); }
+  .box .desc{ font-size:0.68rem; color:var(--ink-faint); margin-top:0.2rem; line-height:1.35; }
+  .box.pulse{ border-color:var(--sage); }
+  .lane{ flex:1; position:relative; height:2px; background:var(--stone-line); }
+  .pill{
+    position:absolute; top:50%; transform:translate(-50%,-50%); left:0%;
+    background:var(--wood-dark); color:var(--paper); font-family:'IBM Plex Mono', monospace;
+    font-size:0.62rem; padding:0.25rem 0.4rem; border-radius:3px; white-space:nowrap;
+    opacity:0; transition: left 0.6s ease, opacity 0.2s ease;
+  }
+  .pill.response{ background:var(--sage-dark); }
+  .pill.visible{ opacity:1; }
+
+  .endpoints{ margin-top:0.7rem; font-family:'IBM Plex Mono', monospace; font-size:0.7rem; color:var(--ink-dim); }
+  .endpoints div{ padding:0.15rem 0; }
+
+  /* --- output log --- */
+  .log-label{ font-size:0.72rem; color:var(--ink-faint); font-family:'IBM Plex Mono', monospace; margin-bottom:0.4rem; }
+  .log{
+    font-family:'IBM Plex Mono', monospace; font-size:0.74rem; line-height:1.65;
+    background:var(--code-bg); color:var(--code-text); border-radius:4px;
+    padding:0.75rem 0.85rem; height:172px; overflow-y:auto; flex:0 0 auto;
+  }
+  .log .res{ color:#9FB08A; } .log .flag{ color:#E1997F; font-weight:600; }
+  .log .ok{ color:#9FB08A; font-weight:600; } .log .hdr{ color:#D8B26E; font-weight:600; }
+  .log .empty{ color:var(--code-dim); }
+
+  .summary{
+    margin-top:0.7rem; border-radius:4px; padding:0.65rem 0.8rem;
+    border:1px solid var(--stone-line); font-size:0.78rem; visibility:hidden;
+  }
+  .summary.show{ visibility:visible; }
+  .summary .head{ font-family:'Fraunces', serif; font-weight:600; font-size:0.86rem; margin-bottom:0.2rem; color:var(--wood-dark); }
+  .summary .detail{ color:var(--ink-dim); line-height:1.5; }
+
+  footer{ margin-top:1.1rem; font-size:0.78rem; color:var(--ink-faint); text-align:center; }
+  footer a{ color:var(--wood-dark); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><div class="mark">8</div><h1>Eight</h1></div>
+    <p class="tagline">Two different ways to catch the same bug — pick a tab to see how each one actually works.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tabbtn active" id="tabSastBtn">SAST <span class="sub">— CodeQL &amp; Semgrep</span></button>
+    <button class="tabbtn" id="tabDastBtn">DAST <span class="sub">— OWASP ZAP</span></button>
+  </div>
+
+  <!-- SAST VIEW -->
+  <div class="view active" id="sastView">
+    <div class="grid">
+      <div class="panel">
+        <div class="subtabs" id="sastSubtabs"></div>
+        <div class="panel-inner">
+          <div class="code-label"><span id="sastFilename">search.js</span></div>
+          <pre class="code" id="sastCode"></pre>
+          <button class="run" id="sastRunBtn">Run static analysis</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="log-label">static-analysis.log</div>
+          <div class="log" id="sastLog"><span class="empty">Waiting to start…</span></div>
+          <div class="summary" id="sastSummary"><div class="head">—</div><div class="detail">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAST VIEW -->
+  <div class="view" id="dastView">
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="code-label">attack path</div>
+          <div class="diagram">
+            <div class="box" id="zapBox"><div class="name">ZAP</div><div class="desc">No source access</div></div>
+            <div class="lane"><div class="pill" id="pillOut">GET /search</div><div class="pill response" id="pillIn">200 OK</div></div>
+            <div class="box" id="appBox"><div class="name">target-app</div><div class="desc">Running container</div></div>
+          </div>
+          <div class="endpoints">
+            <div>GET /search?q=… <span style="color:var(--ink-faint)">— SQLi payload</span></div>
+            <div>GET /render?name=… <span style="color:var(--ink-faint)">— XSS payload</span></div>
+            <div>GET /health <span style="color:var(--ink-faint)">— baseline</span></div>
+          </div>
+          <button class="run" id="dastRunBtn">Start scan</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="log-label">zap-baseline-scan.log</div>
+          <div class="log" id="dastLog"><span class="empty">Waiting to start…</span></div>
+          <div class="summary" id="dastSummary"><div class="head">—</div><div class="detail">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Simulated for demo purposes — <a href="https://github.com/ParitV/Eight" target="_blank" rel="noopener">see the real pipeline on GitHub →</a></footer>
+</div>
+
+<script>
+/* ---------- tab switching ---------- */
+const tabSastBtn = document.getElementById('tabSastBtn');
+const tabDastBtn = document.getElementById('tabDastBtn');
+const sastView = document.getElementById('sastView');
+const dastView = document.getElementById('dastView');
+tabSastBtn.addEventListener('click', () => {
+  tabSastBtn.classList.add('active'); tabDastBtn.classList.remove('active');
+  sastView.classList.add('active'); dastView.classList.remove('active');
+});
+tabDastBtn.addEventListener('click', () => {
+  tabDastBtn.classList.add('active'); tabSastBtn.classList.remove('active');
+  dastView.classList.add('active'); sastView.classList.remove('active');
+});
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+/* ---------- SAST tab ---------- */
+const sastSamples = [
+  {
+    tab: "SQL injection", filename: "search.js",
+    code: [
+      {t:'<span class="kw">app</span>.get(<span class="str">"/search"</span>, (req, res) => {'},
+      {t:'  <span class="kw">const</span> query = req.query.q;', flag:true},
+      {t:'  db.raw(<span class="str">`SELECT * FROM items WHERE name = \'${query}\'`</span>);', flag:true},
+      {t:'  res.send(results);'},
+      {t:'});'}
+    ],
+    steps: [
+      {l:'hdr', text:'Running CodeQL…'},
+      {l:'', text:'→ Tracing: req.query.q (line 2) → db.raw() sink (line 3)'},
+      {l:'flag', text:'⚠ Flagged: SQL Injection (Critical) — CodeQL'},
+      {l:'hdr', text:'Running Semgrep…'},
+      {l:'ok', text:'✓ No additional findings'}
+    ],
+    result: { findings: 1, severity: 'Critical' }
+  },
+  {
+    tab: "XSS", filename: "render.js",
+    code: [
+      {t:'<span class="kw">app</span>.get(<span class="str">"/render"</span>, (req, res) => {'},
+      {t:'  <span class="kw">const</span> name = req.query.name;', flag:true},
+      {t:'  res.send(<span class="str">`&lt;h1&gt;Hello ${name}&lt;/h1&gt;`</span>);', flag:true},
+      {t:'});'}
+    ],
+    steps: [
+      {l:'hdr', text:'Running CodeQL…'},
+      {l:'', text:'→ Tracing: req.query.name (line 2) → res.send() sink (line 3)'},
+      {l:'flag', text:'⚠ Flagged: Reflected XSS (High) — CodeQL'},
+      {l:'hdr', text:'Running Semgrep…'},
+      {l:'ok', text:'✓ No additional findings'}
+    ],
+    result: { findings: 1, severity: 'High' }
+  },
+  {
+    tab: "Hardcoded secret", filename: "config.js",
+    code: [
+      {t:'<span class="kw">module</span>.exports = {'},
+      {t:'  apiKey: <span class="str">"sk_live_4f9a2b7c1e0d..."</span>,', flag:true},
+      {t:'  timeout: <span class="fn">5000</span>'},
+      {t:'};'}
+    ],
+    steps: [
+      {l:'hdr', text:'Running CodeQL…'},
+      {l:'ok', text:'✓ No data-flow issues found'},
+      {l:'hdr', text:'Running Semgrep…'},
+      {l:'', text:'→ Matching rule: hardcoded-credential (line 2)'},
+      {l:'flag', text:'⚠ Flagged: Hardcoded API Key (High) — Semgrep'}
+    ],
+    result: { findings: 1, severity: 'High' }
+  },
+  {
+    tab: "Clean commit", filename: "search.js",
+    code: [
+      {t:'<span class="kw">app</span>.get(<span class="str">"/search"</span>, (req, res) => {'},
+      {t:'  <span class="kw">const</span> query = req.query.q;'},
+      {t:'  db(<span class="str">"items"</span>).where(<span class="str">"name"</span>, query).select();'},
+      {t:'  res.send(results);'},
+      {t:'});'}
+    ],
+    steps: [
+      {l:'hdr', text:'Running CodeQL…'},
+      {l:'ok', text:'✓ No data-flow issues found'},
+      {l:'hdr', text:'Running Semgrep…'},
+      {l:'ok', text:'✓ No pattern matches'}
+    ],
+    result: { findings: 0 }
+  }
+];
+
+let sastCurrent = 0, sastRunning = false;
+const sastSubtabsEl = document.getElementById('sastSubtabs');
+const sastCodeEl = document.getElementById('sastCode');
+const sastFilenameEl = document.getElementById('sastFilename');
+const sastLogEl = document.getElementById('sastLog');
+const sastSummaryEl = document.getElementById('sastSummary');
+const sastRunBtn = document.getElementById('sastRunBtn');
+
+function renderSastSubtabs(){
+  sastSubtabsEl.innerHTML = sastSamples.map((s,i) =>
+    `<button class="subtab ${i===sastCurrent?'active':''}" data-i="${i}">${s.tab}</button>`).join('');
+  [...sastSubtabsEl.children].forEach(btn => btn.addEventListener('click', () => {
+    if(sastRunning) return;
+    sastCurrent = parseInt(btn.dataset.i);
+    renderSastSubtabs(); renderSastCode(); resetSast();
+  }));
+}
+function renderSastCode(){
+  const s = sastSamples[sastCurrent];
+  sastFilenameEl.textContent = s.filename;
+  sastCodeEl.innerHTML = s.code.map(l => `<span class="${l.flag?'flag':''}">${l.t}</span>`).join('\n');
+}
+function resetSast(){
+  sastLogEl.innerHTML = '<span class="empty">Waiting to start…</span>';
+  sastSummaryEl.classList.remove('show');
+  sastRunBtn.disabled = false; sastRunBtn.textContent = 'Run static analysis';
+}
+function sastLogLine(cls, text){
+  if(sastLogEl.querySelector('.empty')) sastLogEl.innerHTML = '';
+  const d = document.createElement('div');
+  if(cls) d.className = cls;
+  d.textContent = text;
+  sastLogEl.appendChild(d);
+  sastLogEl.scrollTop = sastLogEl.scrollHeight;
+}
+async function runSast(){
+  if(sastRunning) return;
+  sastRunning = true;
+  sastRunBtn.disabled = true; sastRunBtn.textContent = 'Analyzing…';
+  sastLogEl.innerHTML = ''; sastSummaryEl.classList.remove('show');
+  const s = sastSamples[sastCurrent];
+  for(const step of s.steps){
+    await sleep(500);
+    sastLogLine(step.l, step.text);
+  }
+  await sleep(300);
+  sastSummaryEl.classList.add('show');
+  if(s.result.findings > 0){
+    sastSummaryEl.innerHTML = `<div class="head">Analysis complete</div><div class="detail"><b>${s.result.findings} finding</b> (${s.result.severity}) — passed to the Aggregator.</div>`;
+  } else {
+    sastSummaryEl.innerHTML = `<div class="head">Analysis complete</div><div class="detail">No findings — clean.</div>`;
+  }
+  sastRunBtn.disabled = false; sastRunBtn.textContent = 'Run again';
+  sastRunning = false;
+}
+sastRunBtn.addEventListener('click', runSast);
+renderSastSubtabs(); renderSastCode();
+
+/* ---------- DAST tab ---------- */
+const dastEndpoints = [
+  { path: "/search?q=test", payload: "' OR '1'='1 --", cleanRes: "200 OK — 1 row returned", payloadRes: "200 OK — ALL rows returned (expected: 1)", flagged: true, finding: "SQL Injection", severity: "High" },
+  { path: "/render?name=test", payload: "&lt;script&gt;alert(1)&lt;/script&gt;", cleanRes: "200 OK — \"Hello test\"", payloadRes: "200 OK — payload reflected unescaped", flagged: true, finding: "Reflected XSS", severity: "High" },
+  { path: "/health", payload: "'; DROP TABLE users; --", cleanRes: "200 OK — {status:\"ok\"}", payloadRes: "200 OK — no behavior change", flagged: false }
+];
+let dastRunning = false;
+const dastLogEl = document.getElementById('dastLog');
+const dastSummaryEl = document.getElementById('dastSummary');
+const dastRunBtn = document.getElementById('dastRunBtn');
+const pillOut = document.getElementById('pillOut');
+const pillIn = document.getElementById('pillIn');
+const zapBox = document.getElementById('zapBox');
+const appBox = document.getElementById('appBox');
+
+function dastLogLine(cls, text){
+  if(dastLogEl.querySelector('.empty')) dastLogEl.innerHTML = '';
+  const d = document.createElement('div');
+  if(cls) d.className = cls;
+  d.innerHTML = text;
+  dastLogEl.appendChild(d);
+  dastLogEl.scrollTop = dastLogEl.scrollHeight;
+}
+async function sendPill(el, text, toRight){
+  el.textContent = text; el.style.transition = 'none';
+  el.style.left = toRight ? '2%' : '98%'; el.classList.remove('visible');
+  void el.offsetWidth;
+  el.style.transition = 'left 0.55s ease, opacity 0.2s ease';
+  el.classList.add('visible');
+  await sleep(20);
+  el.style.left = toRight ? '98%' : '2%';
+  await sleep(600);
+  el.classList.remove('visible');
+}
+async function runDast(){
+  if(dastRunning) return;
+  dastRunning = true;
+  dastRunBtn.disabled = true; dastRunBtn.textContent = 'Scanning…';
+  dastLogEl.innerHTML = ''; dastSummaryEl.classList.remove('show');
+  let findings = 0;
+  for(const ep of dastEndpoints){
+    dastLogLine('hdr', `Testing ${ep.path}`);
+    await sleep(150);
+    zapBox.classList.add('pulse');
+    await sendPill(pillOut, `GET`, true);
+    appBox.classList.add('pulse');
+    dastLogLine('', `→ GET ${ep.path}`);
+    await sleep(100);
+    dastLogLine('res', `← ${ep.cleanRes}`);
+    await sendPill(pillIn, '200', false);
+    appBox.classList.remove('pulse'); zapBox.classList.remove('pulse');
+    await sleep(150);
+    zapBox.classList.add('pulse');
+    await sendPill(pillOut, 'payload', true);
+    appBox.classList.add('pulse');
+    dastLogLine('', `→ Trying payload: ${ep.payload}`);
+    await sleep(100);
+    dastLogLine('res', `← ${ep.payloadRes}`);
+    await sendPill(pillIn, '200', false);
+    appBox.classList.remove('pulse'); zapBox.classList.remove('pulse');
+    await sleep(150);
+    if(ep.flagged){ findings++; dastLogLine('flag', `⚠ Flagged: ${ep.finding} (${ep.severity})`); }
+    else { dastLogLine('ok', `✓ No issue found`); }
+    await sleep(250);
+  }
+  dastSummaryEl.classList.add('show');
+  dastSummaryEl.innerHTML = `<div class="head">Scan complete</div><div class="detail">${dastEndpoints.length} endpoints tested, <b>${findings} findings</b> — passed to the Aggregator.</div>`;
+  dastRunBtn.disabled = false; dastRunBtn.textContent = 'Run again';
+  dastRunning = false;
+}
+dastRunBtn.addEventListener('click', runDast);
+</script>
+</body>
+</html>
