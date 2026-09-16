@@ -1,8 +1,13 @@
+import Seo from '../components/Seo'
 import { profile } from '../data/profile'
 
 function About() {
   return (
     <section>
+      <Seo
+        title="About"
+        description="Background, skills, experience, and education for Parit Vorasaran, Cyber Security Analyst & Application Security Engineer."
+      />
       <div className="flex items-start justify-between gap-6">
         <h1>About Me</h1>
         <a

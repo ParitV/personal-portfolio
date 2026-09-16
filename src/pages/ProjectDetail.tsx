@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import Seo from '../components/Seo'
 import { projects } from '../data/projects'
 
 function ProjectDetail() {
@@ -11,6 +12,10 @@ function ProjectDetail() {
   if (!project) {
     return (
       <section>
+        <Seo
+          title="Project not found"
+          description="This project could not be found."
+        />
         <h1>Project not found</h1>
         <p className="text-wood">We couldn't find a project with that URL.</p>
         <Link to="/projects" className="text-ink underline">
@@ -53,6 +58,7 @@ function ProjectDetail() {
 
   return (
     <article>
+      <Seo title={project.title} description={project.oneLiner} />
       <header>
         <ul className="flex flex-wrap gap-2">
           {project.techStack.map((tech) => (

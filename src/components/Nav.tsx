@@ -10,8 +10,8 @@ const links = [
 function Nav() {
   return (
     <header className="border-b border-stone">
-      <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-6">
-        <NavLink to="/" className="font-serif text-lg text-ink" end>
+      <div className="mx-auto flex max-w-3xl items-center justify-center px-6 py-6 sm:justify-between">
+        <NavLink to="/" className="hidden font-serif text-lg text-ink sm:block" end>
           Parit Vorasaran
         </NavLink>
         <nav>

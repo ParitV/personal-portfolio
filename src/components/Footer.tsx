@@ -7,7 +7,7 @@ function Footer() {
         <ul className="mt-2 flex justify-center gap-6">
           <li>
             <a
-              href="https://github.com/your-username"
+              href="https://github.com/ParitV"
               target="_blank"
               rel="noreferrer"
               className="text-wood transition-colors hover:text-ink"
@@ -17,17 +17,7 @@ function Footer() {
           </li>
           <li>
             <a
-              href="https://www.linkedin.com/in/your-username"
-              target="_blank"
-              rel="noreferrer"
-              className="text-wood transition-colors hover:text-ink"
-            >
-              LinkedIn
-            </a>
-          </li>
-          <li>
-            <a
-              href="mailto:you@example.com"
+              href="mailto:vorasaran.parit@gmail.com"
               className="text-wood transition-colors hover:text-ink"
             >
               Email

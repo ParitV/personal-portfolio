@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import Seo from '../components/Seo'
 
 const quietLinks = [
   { to: '/about', label: 'About' },
@@ -9,6 +10,10 @@ const quietLinks = [
 function Home() {
   return (
     <section className="py-16">
+      <Seo
+        title="Home"
+        description="Cyber Security Analyst & Application Security Engineer, Software Engineer. Portfolio of security and full-stack engineering projects."
+      />
       <h1 className="text-5xl">Parit Vorasaran</h1>
       <p className="mt-3 text-lg text-wood-dark">
         Cyber Security Analyst &amp; Application Security Engineer, Software

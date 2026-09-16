@@ -1,9 +1,14 @@
 import { Link } from 'react-router-dom'
+import Seo from '../components/Seo'
 import { projects } from '../data/projects'
 
 function Projects() {
   return (
     <section>
+      <Seo
+        title="Projects"
+        description="Security and software engineering projects by Parit Vorasaran, including Eight, an automated SAST/DAST pipeline."
+      />
       <h1>Projects</h1>
       <div className="mt-8 grid grid-cols-1 gap-10 sm:grid-cols-2">
         {projects.map((project) => (
