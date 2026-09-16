@@ -6,7 +6,7 @@ function Layout() {
   return (
     <div className="flex min-h-svh flex-col">
       <Nav />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-16 md:px-10">
         <Outlet />
       </main>
       <Footer />

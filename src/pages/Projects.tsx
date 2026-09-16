@@ -4,7 +4,7 @@ import { projects } from '../data/projects'
 
 function Projects() {
   return (
-    <section>
+    <section className="mx-auto max-w-3xl">
       <Seo
         title="Projects"
         description="Security and software engineering projects by Parit Vorasaran, including Eight, an automated SAST/DAST pipeline."

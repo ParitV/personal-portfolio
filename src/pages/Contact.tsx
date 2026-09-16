@@ -2,7 +2,7 @@ import Seo from '../components/Seo'
 
 function Contact() {
   return (
-    <section>
+    <section className="mx-auto max-w-3xl">
       <Seo
         title="Contact"
         description="Get in touch with Parit Vorasaran by email or GitHub."

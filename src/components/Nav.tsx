@@ -10,7 +10,7 @@ const links = [
 function Nav() {
   return (
     <header className="border-b border-stone">
-      <div className="mx-auto flex max-w-3xl items-center justify-center px-6 py-6 sm:justify-between">
+      <div className="mx-auto flex max-w-6xl items-center justify-center px-6 py-6 sm:justify-between md:px-10">
         <NavLink to="/" className="hidden font-serif text-lg text-ink sm:block" end>
           Parit Vorasaran
         </NavLink>
@@ -23,7 +23,7 @@ function Nav() {
                   end={link.end}
                   className={({ isActive }) =>
                     isActive
-                      ? 'font-medium text-ink'
+                      ? 'text-ink underline decoration-1 underline-offset-4'
                       : 'text-wood transition-colors hover:text-ink'
                   }
                 >

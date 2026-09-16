@@ -11,7 +11,7 @@ function ProjectDetail() {
 
   if (!project) {
     return (
-      <section>
+      <section className="mx-auto max-w-3xl">
         <Seo
           title="Project not found"
           description="This project could not be found."
@@ -57,7 +57,7 @@ function ProjectDetail() {
   )
 
   return (
-    <article>
+    <article className="mx-auto max-w-3xl">
       <Seo title={project.title} description={project.oneLiner} />
       <header>
         <ul className="flex flex-wrap gap-2">

@@ -10,6 +10,8 @@
 
   --font-serif: "Fraunces", ui-serif, Georgia, serif;
   --font-sans: "Karla", ui-sans-serif, system-ui, sans-serif;
+  --font-script: "Caveat", cursive;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
 @layer base {
