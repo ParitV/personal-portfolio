@@ -1,9 +1,12 @@
+import { useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { projects } from '../data/projects'
 
 function ProjectDetail() {
   const { slug } = useParams<{ slug: string }>()
   const project = projects.find((p) => p.slug === slug)
+  const demoFrameRef = useRef<HTMLIFrameElement>(null)
+  const [demoHeight, setDemoHeight] = useState(640)
 
   if (!project) {
     return (
@@ -22,6 +25,15 @@ function ProjectDetail() {
     { label: 'Code', href: project.repoUrl },
     { label: 'Docs', href: project.docUrl },
   ].filter((link): link is { label: string; href: string } => Boolean(link.href))
+
+  const handleDemoLoad = () => {
+    const body = demoFrameRef.current?.contentDocument?.body
+    if (!body) return
+
+    const updateHeight = () => setDemoHeight(body.scrollHeight)
+    updateHeight()
+    new ResizeObserver(updateHeight).observe(body)
+  }
 
   const linkButtons = (
     <div className="flex flex-wrap gap-4">
@@ -72,9 +84,12 @@ function ProjectDetail() {
           <section className="border-t border-stone pt-8">
             <h2>Live Demo</h2>
             <iframe
+              ref={demoFrameRef}
               src={project.demoEmbedUrl}
               title={`${project.title} pipeline live demo`}
-              className="h-[640px] w-full rounded"
+              onLoad={handleDemoLoad}
+              style={{ height: demoHeight }}
+              className="w-full rounded"
             />
           </section>
         )}
