@@ -33,7 +33,7 @@ function About() {
         </div>
 
         <div className="flex gap-6">
-          <div className="aspect-[1057/1488] flex-1 overflow-hidden border border-stone">
+          <div className="aspect-[959/1369] flex-1 overflow-hidden border border-stone">
             <img
               src="/reference/aboutme_img.jpeg"
               alt="Textured photograph of rock formations meeting an architectural wall, themed around curiosity, analysis, and impact"
@@ -93,7 +93,7 @@ function About() {
             ))}
           </ol>
 
-          <div className="aspect-[1003/1568] hidden overflow-hidden border border-stone md:block">
+          <div className="aspect-[882/1425] hidden overflow-hidden border border-stone md:block">
             <img
               src="/reference/aboutme_img2.jpeg"
               alt="Layered mountain ridgelines fading into mist, themed around problem solving through a different lens"

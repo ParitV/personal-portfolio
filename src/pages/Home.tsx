@@ -1,58 +1,6 @@
 import { Link } from 'react-router-dom'
 import Seo from '../components/Seo'
 
-function CirclesGraphic() {
-  return (
-    <svg viewBox="0 0 120 120" className="h-16 w-16 text-wood-dark" aria-hidden="true">
-      <circle cx="45" cy="70" r="30" fill="currentColor" opacity="0.15" />
-      <circle cx="70" cy="55" r="26" fill="currentColor" opacity="0.25" />
-      <circle cx="60" cy="80" r="18" fill="currentColor" opacity="0.35" />
-      <circle cx="95" cy="30" r="3" fill="currentColor" />
-      <line x1="95" y1="30" x2="95" y2="68" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-    </svg>
-  )
-}
-
-const pixelPattern = [
-  [0, 0, 0, 1, 1, 0, 0],
-  [0, 0, 1, 1, 1, 1, 0],
-  [0, 1, 1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1, 1, 0],
-  [0, 1, 1, 1, 1, 0, 0],
-  [0, 0, 1, 1, 0, 0, 0],
-  [0, 0, 0, 1, 0, 0, 0],
-]
-
-function PixelGraphic() {
-  return (
-    <div className="grid h-16 w-16 grid-cols-7 gap-0.5" aria-hidden="true">
-      {pixelPattern.flatMap((row, ri) =>
-        row.map((cell, ci) => (
-          <div
-            key={`${ri}-${ci}`}
-            className={cell ? 'bg-wood-dark/40' : 'bg-transparent'}
-          />
-        )),
-      )}
-    </div>
-  )
-}
-
-function TrianglesGraphic() {
-  return (
-    <svg viewBox="0 0 120 90" className="h-16 w-16" aria-hidden="true">
-      <polygon points="10,80 45,20 80,80" fill="currentColor" className="text-stone" />
-      <polygon
-        points="50,80 85,15 120,80"
-        fill="currentColor"
-        className="text-wood-dark"
-        opacity="0.6"
-      />
-      <circle cx="85" cy="15" r="3" fill="currentColor" className="text-ink" />
-    </svg>
-  )
-}
-
 const roles = [
   {
     num: '01',
@@ -60,7 +8,7 @@ const roles = [
     description:
       'Monitor, investigate and respond to security threats. Turn data into actionable insights for safer systems.',
     tags: ['Threat Detection', 'Incident Response', 'Risk Analysis'],
-    Graphic: CirclesGraphic,
+    icon: '/reference/homepage_icon.jpeg',
   },
   {
     num: '02',
@@ -68,7 +16,7 @@ const roles = [
     description:
       'Find and fix vulnerabilities in modern applications. Build security into the development lifecycle.',
     tags: ['SAST/DAST', 'Secure SDLC', 'Automation'],
-    Graphic: PixelGraphic,
+    icon: '/reference/homepage_icon2.jpeg',
   },
   {
     num: '03',
@@ -76,7 +24,7 @@ const roles = [
     description:
       'Build and deploy secure, scalable applications. Bridge development and security through automation.',
     tags: ['CI/CD', 'Cloud', 'Infrastructure as Code'],
-    Graphic: TrianglesGraphic,
+    icon: '/reference/homepage_icon3.jpeg',
   },
 ]
 
@@ -154,7 +102,12 @@ function Home() {
             <div key={role.num} className="border-t border-stone pt-6">
               <div className="flex items-start justify-between gap-4">
                 <span className="font-mono text-sm text-wood">{role.num}</span>
-                <role.Graphic />
+                <img
+                  src={role.icon}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-20 w-20 object-cover"
+                />
               </div>
               <h2 className="mt-4 text-xl">{role.title}</h2>
               <p className="mt-2 text-wood">{role.description}</p>
