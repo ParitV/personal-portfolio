@@ -9,6 +9,7 @@ export type Project = {
   keyDecisions: string[]
   repoUrl: string
   demoUrl?: string
+  demoEmbedUrl?: string
   docUrl?: string
   coverImage?: string
   architectureImage?: string
@@ -31,6 +32,6 @@ export const projects: Project[] = [
       "OWASP ZAP's baseline scan was used instead of a full active scan: baseline scans are passive and fast enough to run on every PR without risking side effects on the target application, where a full active scan is slower and can mutate state — not something to run unsupervised in CI.",
     ],
     repoUrl: 'https://github.com/ParitV/Eight',
-    demoUrl: 'https://claude.ai/artifact/QKduwA7pXKKW5ivLgJFzum',
+    demoEmbedUrl: '/demo/eight-pipeline-demo.html',
   },
 ]

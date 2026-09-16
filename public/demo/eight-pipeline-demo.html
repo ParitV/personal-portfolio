@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eight — live pipeline demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2ECE1;
+    --stone:#E4DCC9;
+    --stone-line:#D3C7AE;
+    --wood:#8B6F52;
+    --wood-dark:#5C4A38;
+    --ink:#2B2A26;
+    --ink-dim:#6B5F4F;
+    --ink-faint:#9C8F7A;
+    --sage:#7C8C6D;
+    --sage-dark:#63704F;
+    --sage-tint:#E4E9DD;
+    --terracotta:#B5533C;
+    --terracotta-tint:#F1E0D8;
+    --code-bg:#2A2118;
+    --code-text:#EFE7D8;
+    --code-kw:#D8B26E;
+    --code-str:#A8B896;
+    --code-fn:#D98C6D;
+    --code-com:#8A7F6C;
+    color-scheme: light;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Karla', system-ui, sans-serif;
+    padding:3rem 1.25rem 4rem;
+    min-height:100vh;
+  }
+  .wrap{ max-width:940px; margin:0 auto; }
+
+  header{ margin-bottom:2.5rem; }
+  .brand{ display:flex; align-items:baseline; gap:0.7rem; }
+  .brand .mark{
+    width:2.15rem; height:2.15rem; border-radius:6px;
+    background:var(--wood-dark); color:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.2rem;
+    flex-shrink:0;
+  }
+  h1{ font-family:'Fraunces', serif; font-size:1.75rem; font-weight:600; margin:0; color:var(--wood-dark); letter-spacing:-0.01em; }
+  .tagline{ color:var(--ink-dim); font-size:1rem; margin:0.7rem 0 0; max-width:58ch; line-height:1.6; }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap:1.5rem;
+    align-items:start;
+  }
+  @media (max-width:760px){ .grid{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:var(--stone);
+    border:1px solid var(--stone-line);
+    border-radius:4px;
+    overflow:hidden;
+  }
+
+  .tabs{ display:flex; border-bottom:1px solid var(--stone-line); }
+  .tab{
+    flex:1; padding:0.75rem 0.5rem; text-align:center;
+    font-size:0.83rem; color:var(--ink-dim); cursor:pointer;
+    background:transparent; border:none; font-family:'Karla', sans-serif; font-weight:600;
+    border-bottom:2px solid transparent;
+  }
+  .tab.active{ color:var(--wood-dark); border-bottom-color:var(--sage); }
+  .tab:hover:not(.active){ color:var(--ink); }
+
+  .code-area{ padding:1.2rem 1.25rem; }
+  .code-label{ font-size:0.78rem; color:var(--ink-faint); margin-bottom:0.65rem; font-family:'IBM Plex Mono', monospace; }
+  pre{
+    margin:0; font-family:'IBM Plex Mono', monospace; font-size:0.83rem;
+    line-height:1.7; overflow-x:auto; color:var(--code-text);
+    background:var(--code-bg);
+    padding:1rem 1.1rem;
+    border-radius:4px;
+  }
+  pre .line{ display:block; }
+  pre .flag{ background:rgba(181,83,60,0.28); display:block; margin:0 -1.1rem; padding:0 1.1rem; border-left:2px solid var(--terracotta); }
+  pre .kw{ color:var(--code-kw); }
+  pre .str{ color:var(--code-str); }
+  pre .fn{ color:var(--code-fn); }
+  pre .com{ color:var(--code-com); }
+
+  .run-row{ padding: 0 1.25rem 1.25rem; }
+  button.run{
+    width:100%; padding:0.8rem 1rem; border-radius:4px; border:none;
+    background:var(--sage); color:var(--paper); font-weight:700; font-size:0.92rem;
+    font-family:'Karla', sans-serif; cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  button.run:disabled{ opacity:0.55; cursor:default; }
+  button.run:hover:not(:disabled){ background:var(--sage-dark); }
+
+  .stages{ padding:1.2rem; display:flex; flex-direction:column; gap:0.6rem; }
+  .stage{
+    display:flex; align-items:center; gap:0.8rem;
+    padding:0.7rem 0.8rem; border-radius:4px;
+    border:1px solid var(--stone-line); background:var(--paper);
+    opacity:0.55; transition: opacity 0.25s ease, border-color 0.25s ease;
+  }
+  .stage.active{ opacity:1; border-color:var(--sage); }
+  .stage.done{ opacity:1; }
+  .stage .num{
+    width:1.6rem; height:1.6rem; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:0.76rem; font-weight:600;
+    background:var(--stone); color:var(--ink-dim);
+  }
+  .stage.active .num{ background:var(--sage); color:var(--paper); }
+  .stage.done .num{ background:var(--sage-tint); color:var(--sage-dark); }
+  .stage.done.flagged .num{ background:var(--terracotta-tint); color:var(--terracotta); }
+  .stage .label{ font-size:0.86rem; font-weight:600; color:var(--ink); }
+  .stage .sub{ font-size:0.75rem; color:var(--ink-faint); margin-top:0.1rem; }
+  .stage .spin{
+    margin-left:auto; width:14px; height:14px; border-radius:50%;
+    border:2px solid var(--stone-line); border-top-color:var(--sage);
+    animation: spin 0.7s linear infinite; display:none;
+  }
+  .stage.active .spin{ display:block; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .verdict{
+    margin:0 1.2rem 1.2rem; border-radius:4px; padding:1rem 1.1rem;
+    border:1px solid var(--stone-line); font-size:0.86rem;
+    display:none;
+  }
+  .verdict.show{ display:block; }
+  .verdict.blocked{ border-color:var(--terracotta); background:var(--terracotta-tint); }
+  .verdict.passed{ border-color:var(--sage); background:var(--sage-tint); }
+  .verdict .head{ font-family:'Fraunces', serif; font-weight:600; font-size:0.98rem; margin-bottom:0.4rem; display:flex; align-items:center; gap:0.5rem; }
+  .verdict.blocked .head{ color:var(--terracotta); }
+  .verdict.passed .head{ color:var(--sage-dark); }
+  .verdict .detail{ color:var(--ink-dim); line-height:1.6; }
+  .verdict .detail b{ color:var(--ink); font-weight:700; }
+  .verdict .fix{ margin-top:0.65rem; padding-top:0.65rem; border-top:1px solid var(--stone-line); font-family:'IBM Plex Mono', monospace; font-size:0.78rem; color:var(--ink-dim); }
+
+  footer{ margin-top:2.25rem; font-size:0.83rem; color:var(--ink-faint); text-align:center; }
+  footer a{ color:var(--wood-dark); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">8</div>
+      <h1>Eight</h1>
+    </div>
+    <p class="tagline">An automated SAST/DAST pipeline that scans, attacks, and gates every pull request before it merges. Pick a sample below and run it through the pipeline.</p>
+  </header>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="tabs" id="tabs"></div>
+      <div class="code-area">
+        <div class="code-label">target-app / <span id="filename">search.js</span></div>
+        <pre id="codeblock"></pre>
+      </div>
+      <div class="run-row">
+        <button class="run" id="runBtn">Run pipeline</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="stages" id="stages"></div>
+      <div class="verdict" id="verdict"></div>
+    </div>
+  </div>
+
+  <footer>Simulated run for demo purposes — <a href="https://github.com/ParitV/Eight" target="_blank" rel="noopener">see the real pipeline on GitHub →</a></footer>
+</div>
+
+<script>
+const samples = [
+  {
+    tab: "SQL injection",
+    filename: "search.js",
+    code: [
+      {t:'<span class="kw">app</span>.get(<span class="str">"/search"</span>, (req, res) => {'},
+      {t:'  <span class="kw">const</span> query = req.query.q;', flag:true},
+      {t:'  db.raw(<span class="str">`SELECT * FROM items WHERE name = \'${query}\'`</span>);', flag:true},
+      {t:'  res.send(results);'},
+      {t:'});'}
+    ],
+    clean:false,
+    finding:{
+      tool:"CodeQL", severity:"Critical", file:"search.js", line:3,
+      msg:"User input flows directly into a raw SQL query without sanitization (SQL Injection).",
+      fix:"Use a parameterized query: db.raw('SELECT * FROM items WHERE name = ?', [query])"
+    }
+  },
+  {
+    tab: "XSS",
+    filename: "render.js",
+    code: [
+      {t:'<span class="kw">app</span>.get(<span class="str">"/render"</span>, (req, res) => {'},
+      {t:'  <span class="kw">const</span> name = req.query.name;', flag:true},
+      {t:'  res.send(<span class="str">`&lt;h1&gt;Hello ${name}&lt;/h1&gt;`</span>);', flag:true},
+      {t:'});'}
+    ],
+    clean:false,
+    finding:{
+      tool:"OWASP ZAP", severity:"High", file:"render.js", line:3,
+      msg:"Unescaped user input is reflected directly into the HTML response (Reflected XSS).",
+      fix:"Escape output before rendering, e.g. res.send(escapeHtml(`Hello ${name}`))"
+    }
+  },
+  {
+    tab: "Hardcoded secret",
+    filename: "config.js",
+    code: [
+      {t:'<span class="kw">module</span>.exports = {'},
+      {t:'  apiKey: <span class="str">"sk_live_4f9a2b7c1e0d..."</span>,', flag:true},
+      {t:'  timeout: <span class="fn">5000</span>'},
+      {t:'};'}
+    ],
+    clean:false,
+    finding:{
+      tool:"Semgrep", severity:"High", file:"config.js", line:2,
+      msg:"A live-looking API key is hardcoded directly in source control.",
+      fix:"Move it to an environment variable: apiKey: process.env.API_KEY"
+    }
+  },
+  {
+    tab: "Clean commit",
+    filename: "search.js",
+    code: [
+      {t:'<span class="kw">app</span>.get(<span class="str">"/search"</span>, (req, res) => {'},
+      {t:'  <span class="kw">const</span> query = req.query.q;'},
+      {t:'  db(<span class="str">"items"</span>).where(<span class="str">"name"</span>, query).select();'},
+      {t:'  res.send(results);'},
+      {t:'});'}
+    ],
+    clean:true,
+    finding:null
+  }
+];
+
+const stageDefs = [
+  {label:"SAST — CodeQL", sub:"Tracing data flow from input to sink"},
+  {label:"SAST — Semgrep", sub:"Matching known-unsafe code patterns"},
+  {label:"DAST — OWASP ZAP", sub:"Attacking the running container over HTTP"},
+  {label:"Aggregator", sub:"Merging findings, checking severity policy"}
+];
+
+let current = 0;
+let running = false;
+
+const tabsEl = document.getElementById('tabs');
+const codeEl = document.getElementById('codeblock');
+const filenameEl = document.getElementById('filename');
+const stagesEl = document.getElementById('stages');
+const verdictEl = document.getElementById('verdict');
+const runBtn = document.getElementById('runBtn');
+
+function renderTabs(){
+  tabsEl.innerHTML = samples.map((s,i)=>
+    `<button class="tab ${i===current?'active':''}" data-i="${i}">${s.tab}</button>`
+  ).join('');
+  [...tabsEl.children].forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(running) return;
+      current = parseInt(btn.dataset.i);
+      renderTabs();
+      renderCode();
+      resetStages();
+    });
+  });
+}
+
+function renderCode(){
+  const s = samples[current];
+  filenameEl.textContent = s.filename;
+  codeEl.innerHTML = s.code.map(l => `<span class="line ${l.flag?'flag':''}">${l.t}</span>`).join('\n');
+}
+
+function renderStages(){
+  stagesEl.innerHTML = stageDefs.map((s,i)=>
+    `<div class="stage" id="stage-${i}">
+      <div class="num">${i+1}</div>
+      <div>
+        <div class="label">${s.label}</div>
+        <div class="sub">${s.sub}</div>
+      </div>
+      <div class="spin"></div>
+    </div>`
+  ).join('');
+}
+
+function resetStages(){
+  renderStages();
+  verdictEl.className = 'verdict';
+  verdictEl.innerHTML = '';
+  runBtn.disabled = false;
+  runBtn.textContent = 'Run pipeline';
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function runPipeline(){
+  if(running) return;
+  running = true;
+  runBtn.disabled = true;
+  runBtn.textContent = 'Running…';
+  resetStages();
+
+  const s = samples[current];
+  const flagAtStage = s.clean ? -1 : (s.finding.tool === 'CodeQL' ? 0 : s.finding.tool === 'Semgrep' ? 1 : s.finding.tool === 'OWASP ZAP' ? 2 : -1);
+
+  for(let i=0;i<stageDefs.length;i++){
+    const el = document.getElementById(`stage-${i}`);
+    el.classList.add('active');
+    await sleep(650);
+    el.classList.remove('active');
+    el.classList.add('done');
+    if(i === flagAtStage){ el.classList.add('flagged'); }
+  }
+
+  verdictEl.classList.add('show');
+  if(s.clean){
+    verdictEl.classList.add('passed');
+    verdictEl.innerHTML = `
+      <div class="head">✓ Merge allowed</div>
+      <div class="detail">All three scans completed with no High or Critical findings. The check passes and the PR is free to merge.</div>
+    `;
+  } else {
+    const f = s.finding;
+    verdictEl.classList.add('blocked');
+    verdictEl.innerHTML = `
+      <div class="head">✕ Merge blocked</div>
+      <div class="detail"><b>${f.severity}</b> finding from <b>${f.tool}</b> — ${f.file}:${f.line}<br>${f.msg}</div>
+      <div class="fix">fix → ${f.fix}</div>
+    `;
+  }
+
+  runBtn.disabled = false;
+  runBtn.textContent = 'Run again';
+  running = false;
+}
+
+runBtn.addEventListener('click', runPipeline);
+renderTabs();
+renderCode();
+renderStages();
+</script>
+</body>
+</html>

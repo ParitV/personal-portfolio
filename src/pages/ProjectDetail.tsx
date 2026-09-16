@@ -68,6 +68,17 @@ function ProjectDetail() {
           <p>{project.whatIBuilt}</p>
         </section>
 
+        {project.demoEmbedUrl && (
+          <section className="border-t border-stone pt-8">
+            <h2>Live Demo</h2>
+            <iframe
+              src={project.demoEmbedUrl}
+              title={`${project.title} pipeline live demo`}
+              className="h-[640px] w-full rounded"
+            />
+          </section>
+        )}
+
         {project.architectureImage && (
           <section className="border-t border-stone pt-8">
             <h2>Architecture</h2>
