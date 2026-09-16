@@ -97,16 +97,16 @@ function Home() {
           </a>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           {roles.map((role) => (
-            <div key={role.num} className="border-t border-stone pt-6">
+            <div key={role.num} className="border border-stone p-8">
               <div className="flex items-start justify-between gap-4">
                 <span className="font-mono text-sm text-wood">{role.num}</span>
                 <img
                   src={role.icon}
                   alt=""
                   aria-hidden="true"
-                  className="h-20 w-20 object-cover"
+                  className="h-28 w-28 object-cover"
                 />
               </div>
               <h2 className="mt-4 text-xl">{role.title}</h2>
