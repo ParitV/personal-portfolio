@@ -381,9 +381,13 @@ function EightDemo() {
                     {dastActive.method} {dastActive.path}
                   </p>
                   <p className="mt-1 text-[#EFE7D8]">baseline: {dastActive.baselineLabel}</p>
-                  <p className={dastActive.finding ? 'text-[#E1997F]' : 'text-[#9FB08A]'}>
-                    attack: {dastActive.attackLabel}
-                  </p>
+                  {hasRun ? (
+                    <p className={dastActive.finding ? 'text-[#E1997F]' : 'text-[#9FB08A]'}>
+                      attack: {dastActive.attackLabel}
+                    </p>
+                  ) : (
+                    <p className="text-[#9C8F7A]">attack: —</p>
+                  )}
                 </div>
               </div>
             </>
