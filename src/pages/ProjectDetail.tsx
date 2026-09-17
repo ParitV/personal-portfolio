@@ -274,6 +274,18 @@ function ProjectDetail() {
           <div className="mt-8">
             <EightDemo />
           </div>
+
+          <p className="mt-6 text-center text-sm text-wood">
+            Simulated for demo purposes — view the full workflow on{' '}
+            <a
+              href={project.repoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-ink underline-offset-4 hover:underline"
+            >
+              GitHub ↗
+            </a>
+          </p>
         </section>
       )}
 
