@@ -352,7 +352,7 @@ function EightDemo() {
                   </div>
                 </div>
 
-                <div className="mt-6 space-y-2.5 font-mono text-[11px]">
+                <div className="mt-4 space-y-2 font-mono text-[11px]">
                   {dastExamples.map((ex, i) => {
                     const isSelected = i === exampleIndex
                     const showResult = isSelected && hasRun
@@ -376,7 +376,7 @@ function EightDemo() {
                   })}
                 </div>
 
-                <div className="mt-6 border-t border-[#4A3F30] pt-3 font-mono text-[11px]">
+                <div className="mt-4 border-t border-[#4A3F30] pt-3 font-mono text-[11px]">
                   <p className="text-[#9C8F7A]">
                     {dastActive.method} {dastActive.path}
                   </p>
