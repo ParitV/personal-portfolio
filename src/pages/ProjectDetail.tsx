@@ -267,7 +267,7 @@ function ProjectDetail() {
               <div className="mt-2 h-px w-6 bg-stone" />
             </div>
             <p className="text-sm text-wood">
-              Try it out – two different ways to catch the same bug.
+              Try it out – see what each catches that the other can't.
             </p>
           </div>
 

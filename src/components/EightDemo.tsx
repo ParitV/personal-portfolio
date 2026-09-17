@@ -10,17 +10,26 @@ type Finding = {
 
 type CodeLine = { text: string; flag?: boolean }
 
-type InputExample = {
+type SastExample = {
   tab: string
   header: string
   lines: CodeLine[]
+}
+
+type DastExample = {
+  tab: string
+  method: string
+  path: string
+  baselineLabel: string
+  attackLabel: string
+  flagged: boolean
 }
 
 type LogEntry =
   | { kind: 'run' | 'ok' | 'alert' | 'finding'; text: string }
   | { kind: 'blank' }
 
-const sastExamples: InputExample[] = [
+const sastExamples: SastExample[] = [
   {
     tab: 'search.js',
     header: 'search.js',
@@ -85,64 +94,63 @@ const sastFindings: Finding[] = [
   { severity: 'Medium', title: 'Hardcoded Secret', location: 'config.js:8' },
 ]
 
-const dastExamples: InputExample[] = [
+// Deliberately distinct from the SAST examples above — these are the kind of
+// runtime-only issues source-code scanning can't see: broken access control
+// across requests, live response headers, and error-handling behaviour.
+const dastExamples: DastExample[] = [
   {
-    tab: 'SQL Injection',
-    header: "GET /search?q=' OR '1'='1 --",
-    lines: [
-      { text: "GET /search?q=' OR '1'='1 -- HTTP/1.1" },
-      { text: 'Host: target-app.local' },
-      { text: 'User-Agent: ZAP/2.15.0' },
-    ],
+    tab: 'IDOR',
+    method: 'GET',
+    path: '/api/orders/1002',
+    baselineLabel: '200 OK — order #1001 (your own)',
+    attackLabel: '200 OK — order #1003 (not yours)',
+    flagged: true,
   },
   {
-    tab: 'Reflected XSS',
-    header: 'GET /render?name=<script>alert(1)</script>',
-    lines: [
-      { text: 'GET /render?name=<script>alert(1)</script> HTTP/1.1' },
-      { text: 'Host: target-app.local' },
-      { text: 'User-Agent: ZAP/2.15.0' },
-    ],
+    tab: 'CORS Misconfig',
+    method: 'GET',
+    path: '/api/profile',
+    baselineLabel: '200 OK — no CORS headers (same-origin)',
+    attackLabel: 'Access-Control-Allow-Origin: evil.example',
+    flagged: true,
   },
   {
     tab: 'Missing Headers',
-    header: 'GET /',
-    lines: [
-      { text: 'GET / HTTP/1.1' },
-      { text: 'Host: target-app.local' },
-      { text: 'User-Agent: ZAP/2.15.0' },
-    ],
+    method: 'GET',
+    path: '/',
+    baselineLabel: '200 OK — response received',
+    attackLabel: 'No CSP, no X-Frame-Options',
+    flagged: true,
   },
   {
-    tab: 'Health Check',
-    header: 'GET /health',
-    lines: [
-      { text: 'GET /health HTTP/1.1' },
-      { text: 'Host: target-app.local' },
-      { text: 'User-Agent: ZAP/2.15.0' },
-    ],
+    tab: 'Auth Check',
+    method: 'GET',
+    path: '/api/settings',
+    baselineLabel: '401 Unauthorized — no token',
+    attackLabel: '401 Unauthorized — bypass rejected',
+    flagged: false,
   },
 ]
 
 const dastLog: LogEntry[] = [
   { kind: 'run', text: 'Spidering target...' },
-  { kind: 'ok', text: 'Spider complete — 4 URLs found' },
+  { kind: 'ok', text: 'Spider complete — 4 endpoints found' },
   { kind: 'run', text: 'Running passive scan...' },
   { kind: 'ok', text: 'Passive scan complete' },
   { kind: 'run', text: 'Running active scan (baseline)...' },
   { kind: 'ok', text: 'Active scan complete' },
   { kind: 'alert', text: '3 issues found' },
   { kind: 'blank' },
-  { kind: 'finding', text: '[High] SQL Injection (/search)' },
-  { kind: 'finding', text: '[High] Reflected XSS (/render)' },
+  { kind: 'finding', text: '[High] Broken Access Control (IDOR) (/api/orders)' },
+  { kind: 'finding', text: '[Medium] CORS Misconfiguration (/api/profile)' },
   { kind: 'finding', text: '[Low] Missing Security Headers (site-wide)' },
   { kind: 'blank' },
   { kind: 'alert', text: 'Build failed.' },
 ]
 
 const dastFindings: Finding[] = [
-  { severity: 'High', title: 'SQL Injection', location: '/search' },
-  { severity: 'High', title: 'Reflected XSS', location: '/render' },
+  { severity: 'High', title: 'Broken Access Control (IDOR)', location: '/api/orders' },
+  { severity: 'Medium', title: 'CORS Misconfiguration', location: '/api/profile' },
   { severity: 'Low', title: 'Missing Security Headers', location: 'site-wide' },
 ]
 
@@ -184,10 +192,16 @@ function EightDemo() {
   const [hasRun, setHasRun] = useState(false)
   const [visibleLines, setVisibleLines] = useState(0)
 
-  const examples = mainTab === 'sast' ? sastExamples : dastExamples
+  // DAST attack-path animation state
+  const [attackStep, setAttackStep] = useState(-1)
+  const [testedSteps, setTestedSteps] = useState<number[]>([])
+  const [pillLabel, setPillLabel] = useState('')
+  const [pillSide, setPillSide] = useState<'out' | 'back'>('out')
+  const [pillVisible, setPillVisible] = useState(false)
+
   const logScript = mainTab === 'sast' ? sastLog : dastLog
   const findings = mainTab === 'sast' ? sastFindings : dastFindings
-  const active = examples[exampleIndex]
+  const activeSast = sastExamples[exampleIndex]
 
   function switchMainTab(tab: 'sast' | 'dast') {
     if (running) return
@@ -196,6 +210,9 @@ function EightDemo() {
     setOutputTab('log')
     setHasRun(false)
     setVisibleLines(0)
+    setAttackStep(-1)
+    setTestedSteps([])
+    setPillVisible(false)
   }
 
   function switchExample(index: number) {
@@ -203,14 +220,49 @@ function EightDemo() {
     setExampleIndex(index)
   }
 
-  async function run() {
+  async function runSast() {
     if (running) return
     setRunning(true)
     setHasRun(false)
     setOutputTab('log')
     setVisibleLines(0)
-    for (let i = 0; i < logScript.length; i++) {
+    for (let i = 0; i < sastLog.length; i++) {
       await sleep(350)
+      setVisibleLines((n) => n + 1)
+    }
+    await sleep(200)
+    setRunning(false)
+    setHasRun(true)
+  }
+
+  async function sendPill(label: string, side: 'out' | 'back') {
+    setPillLabel(label)
+    setPillSide(side)
+    setPillVisible(true)
+    await sleep(450)
+    setPillVisible(false)
+    await sleep(150)
+  }
+
+  async function runDast() {
+    if (running) return
+    setRunning(true)
+    setHasRun(false)
+    setOutputTab('log')
+    setVisibleLines(0)
+    setTestedSteps([])
+
+    for (let i = 0; i < dastExamples.length; i++) {
+      setAttackStep(i)
+      await sendPill(dastExamples[i].method, 'out')
+      await sendPill('resp', 'back')
+      setTestedSteps((steps) => [...steps, i])
+      await sleep(150)
+    }
+    setAttackStep(-1)
+
+    for (let i = 0; i < dastLog.length; i++) {
+      await sleep(300)
       setVisibleLines((n) => n + 1)
     }
     await sleep(200)
@@ -246,7 +298,7 @@ function EightDemo() {
       </div>
 
       <div className="mt-6 flex flex-wrap gap-1 border-b border-stone/60 text-xs">
-        {examples.map((example, i) => (
+        {(mainTab === 'sast' ? sastExamples : dastExamples).map((example, i) => (
           <button
             key={example.tab}
             type="button"
@@ -264,28 +316,112 @@ function EightDemo() {
 
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="border border-stone">
-          <div className="flex items-center gap-2 border-b border-stone px-4 py-3 font-mono text-xs text-wood">
-            <span>📄</span>
-            <span>{active.header}</span>
-          </div>
-          <div className="h-72 overflow-y-auto bg-[#2A2118] p-4 font-mono text-xs leading-6 text-[#EFE7D8]">
-            {active.lines.map((line, i) => (
-              <div
-                key={i}
-                className={
-                  line.flag
-                    ? '-mx-4 border-l-2 border-alert bg-alert/20 px-4'
-                    : undefined
-                }
-              >
-                {line.text || ' '}
+          {mainTab === 'sast' ? (
+            <>
+              <div className="flex items-center gap-2 border-b border-stone px-4 py-3 font-mono text-xs text-wood">
+                <span>📄</span>
+                <span>{activeSast.header}</span>
               </div>
-            ))}
-          </div>
+              <div className="h-72 overflow-y-auto bg-[#2A2118] p-4 font-mono text-xs leading-6 text-[#EFE7D8]">
+                {activeSast.lines.map((line, i) => (
+                  <div
+                    key={i}
+                    className={
+                      line.flag ? '-mx-4 border-l-2 border-alert bg-alert/20 px-4' : undefined
+                    }
+                  >
+                    {line.text || ' '}
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 border-b border-stone px-4 py-3 font-mono text-xs text-wood">
+                <span>🛰️</span>
+                <span>Attack Path</span>
+              </div>
+              <div className="h-72 overflow-y-auto bg-[#2A2118] p-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex-1 rounded-sm border px-3 py-2 text-center transition-colors ${
+                      attackStep >= 0 ? 'border-sage' : 'border-[#4A3F30]'
+                    }`}
+                  >
+                    <p className="font-serif text-sm text-[#EFE7D8]">ZAP</p>
+                    <p className="text-[10px] text-[#9C8F7A]">No source access</p>
+                  </div>
+                  <div className="relative h-px flex-1 bg-[#4A3F30]">
+                    <span
+                      className="absolute top-1/2 -translate-y-1/2 rounded-sm bg-[#D8B26E] px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap text-[#2A2118] transition-all duration-500 ease-in-out"
+                      style={{
+                        left: pillSide === 'out' ? '4%' : '78%',
+                        opacity: pillVisible ? 1 : 0,
+                      }}
+                    >
+                      {pillLabel}
+                    </span>
+                  </div>
+                  <div
+                    className={`flex-1 rounded-sm border px-3 py-2 text-center transition-colors ${
+                      attackStep >= 0 ? 'border-sage' : 'border-[#4A3F30]'
+                    }`}
+                  >
+                    <p className="font-serif text-sm text-[#EFE7D8]">target-app</p>
+                    <p className="text-[10px] text-[#9C8F7A]">Running container</p>
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-2.5 font-mono text-[11px]">
+                  {dastExamples.map((ex, i) => {
+                    const isActive = attackStep === i
+                    const isSelected = i === exampleIndex
+                    const tested = testedSteps.includes(i)
+                    return (
+                      <div
+                        key={ex.tab}
+                        className={`flex items-center justify-between gap-2 ${
+                          isActive
+                            ? 'text-[#D8B26E]'
+                            : isSelected
+                              ? 'text-[#EFE7D8]'
+                              : 'text-[#9C8F7A]'
+                        }`}
+                      >
+                        <span>
+                          {ex.method} {ex.path}
+                        </span>
+                        {tested && (
+                          <span className={ex.flagged ? 'text-[#E1997F]' : 'text-[#9FB08A]'}>
+                            {ex.flagged ? '⚠' : '✓'}
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {(() => {
+                  const detail = dastExamples[attackStep >= 0 ? attackStep : exampleIndex]
+                  return (
+                    <div className="mt-6 border-t border-[#4A3F30] pt-3 font-mono text-[11px]">
+                      <p className="text-[#9C8F7A]">
+                        {detail.method} {detail.path}
+                      </p>
+                      <p className="mt-1 text-[#EFE7D8]">baseline: {detail.baselineLabel}</p>
+                      <p className={detail.flagged ? 'text-[#E1997F]' : 'text-[#9FB08A]'}>
+                        attack: {detail.attackLabel}
+                      </p>
+                    </div>
+                  )
+                })()}
+              </div>
+            </>
+          )}
           <div className="p-4">
             <button
               type="button"
-              onClick={run}
+              onClick={mainTab === 'sast' ? runSast : runDast}
               disabled={running}
               className="w-full bg-sage px-4 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-sage/80 disabled:opacity-60"
             >
@@ -320,7 +456,7 @@ function EightDemo() {
                   : 'px-4 py-3 text-wood transition-colors hover:text-ink'
               }
             >
-              Security Findings ({findings.length})
+              Security Findings{hasRun ? ` (${findings.length})` : ''}
             </button>
           </div>
 
