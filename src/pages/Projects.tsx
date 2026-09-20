@@ -15,7 +15,7 @@ function Projects() {
           <Link
             to={`/projects/${project.slug}`}
             key={project.slug}
-            className="group block"
+            className="group block border border-stone p-6 transition-colors hover:border-wood"
           >
             <div className="aspect-video overflow-hidden border border-stone bg-stone/20">
               {project.coverImage && (

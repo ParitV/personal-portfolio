@@ -259,6 +259,71 @@ function ProjectDetail() {
         </div>
       </section>
 
+      {project.architectureNote && (
+        <section className="mt-20 border-t border-stone pt-12">
+          <h2 className="text-3xl">Architecture</h2>
+          <div className="mt-2 h-px w-6 bg-stone" />
+          {project.architectureImage && (
+            <img
+              src={project.architectureImage}
+              alt={`${project.title} architecture diagram`}
+              className="mt-8 w-full border border-stone"
+            />
+          )}
+          <p className="mt-6 max-w-2xl text-wood">{project.architectureNote}</p>
+        </section>
+      )}
+
+      {project.keyFinding && (
+        <section className="mt-20 border-t border-stone pt-12">
+          <p className="font-mono text-xs tracking-widest text-wood uppercase">The Finding</p>
+          <h2 className="mt-4 max-w-2xl text-3xl">{project.keyFinding.summary}</h2>
+          <div className="mt-4 h-px w-6 bg-stone" />
+          <ol className="mt-8 space-y-6">
+            {project.keyFinding.points.map((point, i) => (
+              <li key={i} className="flex gap-4 text-wood">
+                <span className="shrink-0 font-mono text-sm text-wood-dark">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {project.detectionCards && (
+        <section className="mt-20 border-t border-stone pt-12">
+          <h2 className="text-3xl">Detections</h2>
+          <div className="mt-2 h-px w-6 bg-stone" />
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {project.detectionCards.map((card) => (
+              <div key={card.mitreId} className="border border-stone p-6">
+                <p className="font-mono text-xs tracking-widest text-wood uppercase">
+                  {card.mitreId}
+                </p>
+                <h3 className="mt-2 text-xl">{card.title}</h3>
+                <p className="mt-3 text-wood">{card.detail}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {project.skillsDemonstrated && (
+        <section className="mt-20 border-t border-stone pt-12">
+          <h2 className="text-3xl">Skills Demonstrated</h2>
+          <div className="mt-2 h-px w-6 bg-stone" />
+          <ul className="mt-8 flex flex-wrap gap-3">
+            {project.skillsDemonstrated.map((skill) => (
+              <li key={skill} className="rounded-full bg-sage/10 px-4 py-2 text-sm text-sage">
+                {skill}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {project.slug === 'eight' && (
         <section id="live-demo" className="mt-20 border-t border-stone pt-12 scroll-mt-8">
           <div className="flex flex-wrap items-baseline justify-between gap-4">
@@ -289,39 +354,53 @@ function ProjectDetail() {
         </section>
       )}
 
-      <section className="mt-20 border-t border-stone pt-12">
-        <h2 className="text-3xl">Tech Stack</h2>
-        <div className="mt-2 h-px w-6 bg-stone" />
+      {project.slug === 'eight' ? (
+        <section className="mt-20 border-t border-stone pt-12">
+          <h2 className="text-3xl">Tech Stack</h2>
+          <div className="mt-2 h-px w-6 bg-stone" />
 
-        <div className="mt-8 flex flex-wrap items-start gap-10">
-          <div className="flex flex-wrap gap-x-10 gap-y-8">
-            {techStackItems.map((item) => (
-              <div key={item.name} className="w-20 text-center">
-                {item.badge ? (
-                  <span
-                    className={`mx-auto flex h-14 w-14 items-center justify-center font-mono text-sm font-bold ${item.badge.bg} ${item.badge.text}`}
-                  >
-                    {item.badge.label}
-                  </span>
-                ) : (
-                  <span className="mx-auto flex h-14 w-14 items-center justify-center border border-stone text-wood-dark">
-                    {item.icon}
-                  </span>
-                )}
-                <p className="mt-3 text-sm text-ink">{item.name}</p>
-                <p className="font-mono text-xs text-wood">{item.category}</p>
-              </div>
+          <div className="mt-8 flex flex-wrap items-start gap-10">
+            <div className="flex flex-wrap gap-x-10 gap-y-8">
+              {techStackItems.map((item) => (
+                <div key={item.name} className="w-20 text-center">
+                  {item.badge ? (
+                    <span
+                      className={`mx-auto flex h-14 w-14 items-center justify-center font-mono text-sm font-bold ${item.badge.bg} ${item.badge.text}`}
+                    >
+                      {item.badge.label}
+                    </span>
+                  ) : (
+                    <span className="mx-auto flex h-14 w-14 items-center justify-center border border-stone text-wood-dark">
+                      {item.icon}
+                    </span>
+                  )}
+                  <p className="mt-3 text-sm text-ink">{item.name}</p>
+                  <p className="font-mono text-xs text-wood">{item.category}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-l border-stone pl-8 font-mono text-xs tracking-widest text-wood uppercase">
+              <p>Open Source</p>
+              <p>Security</p>
+              <p>Collaboration</p>
+              <div className="mt-2 h-px w-6 bg-stone" />
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="mt-20 border-t border-stone pt-12">
+          <h2 className="text-3xl">Tech Stack</h2>
+          <div className="mt-2 h-px w-6 bg-stone" />
+          <ul className="mt-8 flex flex-wrap gap-3">
+            {project.techStack.map((tech) => (
+              <li key={tech} className="border border-stone px-4 py-2 text-sm text-wood-dark">
+                {tech}
+              </li>
             ))}
-          </div>
-
-          <div className="border-l border-stone pl-8 font-mono text-xs tracking-widest text-wood uppercase">
-            <p>Open Source</p>
-            <p>Security</p>
-            <p>Collaboration</p>
-            <div className="mt-2 h-px w-6 bg-stone" />
-          </div>
-        </div>
-      </section>
+          </ul>
+        </section>
+      )}
     </article>
   )
 }
