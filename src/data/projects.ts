@@ -3,11 +3,13 @@ export type Project = {
   title: string
   oneLiner: string
   techStack: string[]
-  role: string
-  date: string
-  type: string
-  problem: string
-  whatIBuilt: string
+  role?: string
+  date?: string
+  type?: string
+  problem?: string
+  whatIBuilt?: string
+  objective?: string
+  whatIDid?: string
   impact: string[]
   myRole: string
   keyDecisions: string[]
@@ -30,13 +32,11 @@ export type Project = {
   skillsDemonstrated?: string[]
 }
 
-// TODO: replace with the real SOC lab GitHub repository URL.
-const SOC_LAB_REPO_URL = 'https://github.com/ParitV/REPLACE_WITH_SOC_LAB_REPO'
-
 export const projects: Project[] = [
   {
     slug: 'eight',
     title: 'Eight',
+    coverImage: '../../public/image/Eight.jpeg', 
     oneLiner:
       'An automated SAST/DAST security pipeline that scans every pull request and blocks merges on high-severity findings.',
     techStack: ['CodeQL', 'Semgrep', 'OWASP ZAP', 'GitHub Actions'],
@@ -63,16 +63,14 @@ export const projects: Project[] = [
   {
     slug: 'soc-siem-lab',
     title: 'Home SOC / SIEM Detection Lab',
+    coverImage: '../../public/image/SIEM_Lab.jpeg',
     oneLiner:
       'Built a home lab with Wazuh SIEM and Sysmon, simulated 4 MITRE ATT&CK techniques, and closed a real detection gap in a built-in SIEM rule with custom detection rules I engineered and debugged myself.',
     techStack: ['Wazuh', 'Sysmon', 'MITRE ATT&CK', 'Docker', 'VirtualBox', 'Windows Event Logs'],
-    role: 'Detection Engineering',
-    date: 'Sep 2026',
-    type: 'Personal Project',
-    problem:
-      "A SIEM's built-in ruleset either fires or it doesn't, and it is easy to trust that silently. I wanted a lab where I could simulate real MITRE ATT&CK techniques against live telemetry and verify, rather than assume, that the detections behind them actually work.",
-    whatIBuilt:
-      "A home SOC lab with Wazuh ingesting Sysmon and Windows event logs from an isolated Windows target and Kali attacker VM. I simulated 4 MITRE ATT&CK techniques and investigated the resulting alerts like an analyst would, which surfaced a real gap: Wazuh's built-in rule for LSASS credential dumping never fired against a real ProcDump attack, because its access-mask allowlist predates current Windows and Sysmon conventions.",
+    objective:
+      "A SIEM's built-in ruleset either fires or it doesn't, and it is easy to trust that silently. The objective of this lab was to simulate real MITRE ATT&CK techniques against live telemetry and verify, rather than assume, that the detections behind them actually work.",
+    whatIDid:
+      "Built a home SOC lab with Wazuh ingesting Sysmon and Windows event logs from an isolated Windows target and Kali attacker VM. Simulated 4 MITRE ATT&CK techniques and investigated the resulting alerts like an analyst would, which surfaced a real gap: Wazuh's built-in rule for LSASS credential dumping never fired against a real ProcDump attack, because its access-mask allowlist predates current Windows and Sysmon conventions.",
     impact: [
       'Found and closed a real detection gap in a built-in SIEM rule',
       'Validated custom rules against live attack traffic across 4 MITRE ATT&CK techniques',
@@ -131,6 +129,6 @@ export const projects: Project[] = [
       'Gap analysis on an existing detection ruleset',
       'Evidence-based investigation',
     ],
-    repoUrl: SOC_LAB_REPO_URL,
+    repoUrl: 'https://github.com/ParitV/soc-siem-detection-lab',
   },
 ]

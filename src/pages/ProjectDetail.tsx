@@ -197,66 +197,109 @@ function ProjectDetail() {
             >
               View on GitHub ↗
             </a>
-            <a
-              href="#live-demo"
-              className="border border-wood-dark px-5 py-2.5 text-ink hover:bg-stone/40"
-            >
-              Live Demo ↓
-            </a>
+            {project.slug === 'eight' && (
+              <a
+                href="#live-demo"
+                className="border border-wood-dark px-5 py-2.5 text-ink hover:bg-stone/40"
+              >
+                Live Demo ↓
+              </a>
+            )}
           </div>
 
-          <div className="mt-10 grid grid-cols-3 gap-6 border-t border-stone pt-6">
-            <div>
-              <p className="text-sm text-wood">Role</p>
-              <p className="mt-1 text-ink">{project.role}</p>
+          {project.role && project.date && project.type && (
+            <div className="mt-10 grid grid-cols-3 gap-6 border-t border-stone pt-6">
+              <div>
+                <p className="text-sm text-wood">Role</p>
+                <p className="mt-1 text-ink">{project.role}</p>
+              </div>
+              <div>
+                <p className="text-sm text-wood">Date</p>
+                <p className="mt-1 text-ink">{project.date}</p>
+              </div>
+              <div>
+                <p className="text-sm text-wood">Type</p>
+                <p className="mt-1 text-ink">{project.type}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-wood">Date</p>
-              <p className="mt-1 text-ink">{project.date}</p>
-            </div>
-            <div>
-              <p className="text-sm text-wood">Type</p>
-              <p className="mt-1 text-ink">{project.type}</p>
-            </div>
-          </div>
+          )}
         </div>
 
         <ProjectHeaderGraphic />
       </div>
 
       <section className="mt-20 grid grid-cols-1 gap-10 border-t border-stone pt-12 md:grid-cols-3">
-        <div>
-          <p className="font-mono text-xs text-wood">01</p>
-          <div className="mt-1 h-px w-6 bg-stone" />
-          <h2 className="mt-4 text-2xl">Problem</h2>
-          <p className="mt-3 text-wood">{project.problem}</p>
-        </div>
+        {project.objective ? (
+          <>
+            <div>
+              <p className="font-mono text-xs text-wood">01</p>
+              <div className="mt-1 h-px w-6 bg-stone" />
+              <h2 className="mt-4 text-2xl">Objective</h2>
+              <p className="mt-3 text-wood">{project.objective}</p>
+            </div>
 
-        <div>
-          <p className="font-mono text-xs text-wood">02</p>
-          <div className="mt-1 h-px w-6 bg-stone" />
-          <h2 className="mt-4 text-2xl">What I Built</h2>
-          <p className="mt-3 text-wood">{project.whatIBuilt}</p>
-        </div>
+            <div>
+              <p className="font-mono text-xs text-wood">02</p>
+              <div className="mt-1 h-px w-6 bg-stone" />
+              <h2 className="mt-4 text-2xl">What I Did</h2>
+              <p className="mt-3 text-wood">{project.whatIDid}</p>
+            </div>
 
-        <div>
-          <p className="font-mono text-xs text-wood">03</p>
-          <div className="mt-1 h-px w-6 bg-stone" />
-          <h2 className="mt-4 text-2xl">Impact</h2>
-          <ul className="mt-4 space-y-3">
-            {project.impact.map((item, i) => {
-              const Icon = impactIcons[i % impactIcons.length]
-              return (
-                <li key={item} className="flex items-start gap-3 text-wood">
-                  <span className="mt-0.5 shrink-0 text-wood-dark">
-                    <Icon />
-                  </span>
-                  <span>{item}</span>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
+            <div>
+              <p className="font-mono text-xs text-wood">03</p>
+              <div className="mt-1 h-px w-6 bg-stone" />
+              <h2 className="mt-4 text-2xl">Results Summary</h2>
+              <ul className="mt-4 space-y-3">
+                {project.impact.map((item, i) => {
+                  const Icon = impactIcons[i % impactIcons.length]
+                  return (
+                    <li key={item} className="flex items-start gap-3 text-wood">
+                      <span className="mt-0.5 shrink-0 text-wood-dark">
+                        <Icon />
+                      </span>
+                      <span>{item}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <p className="font-mono text-xs text-wood">01</p>
+              <div className="mt-1 h-px w-6 bg-stone" />
+              <h2 className="mt-4 text-2xl">Problem</h2>
+              <p className="mt-3 text-wood">{project.problem}</p>
+            </div>
+
+            <div>
+              <p className="font-mono text-xs text-wood">02</p>
+              <div className="mt-1 h-px w-6 bg-stone" />
+              <h2 className="mt-4 text-2xl">What I Built</h2>
+              <p className="mt-3 text-wood">{project.whatIBuilt}</p>
+            </div>
+
+            <div>
+              <p className="font-mono text-xs text-wood">03</p>
+              <div className="mt-1 h-px w-6 bg-stone" />
+              <h2 className="mt-4 text-2xl">Impact</h2>
+              <ul className="mt-4 space-y-3">
+                {project.impact.map((item, i) => {
+                  const Icon = impactIcons[i % impactIcons.length]
+                  return (
+                    <li key={item} className="flex items-start gap-3 text-wood">
+                      <span className="mt-0.5 shrink-0 text-wood-dark">
+                        <Icon />
+                      </span>
+                      <span>{item}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          </>
+        )}
       </section>
 
       {project.architectureNote && (
@@ -271,24 +314,6 @@ function ProjectDetail() {
             />
           )}
           <p className="mt-6 max-w-2xl text-wood">{project.architectureNote}</p>
-        </section>
-      )}
-
-      {project.keyFinding && (
-        <section className="mt-20 border-t border-stone pt-12">
-          <p className="font-mono text-xs tracking-widest text-wood uppercase">The Finding</p>
-          <h2 className="mt-4 max-w-2xl text-3xl">{project.keyFinding.summary}</h2>
-          <div className="mt-4 h-px w-6 bg-stone" />
-          <ol className="mt-8 space-y-6">
-            {project.keyFinding.points.map((point, i) => (
-              <li key={i} className="flex gap-4 text-wood">
-                <span className="shrink-0 font-mono text-sm text-wood-dark">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span>{point}</span>
-              </li>
-            ))}
-          </ol>
         </section>
       )}
 
@@ -307,6 +332,24 @@ function ProjectDetail() {
               </div>
             ))}
           </div>
+        </section>
+      )}
+
+      {project.keyFinding && (
+        <section className="mt-20 border-t border-stone pt-12">
+          <p className="font-mono text-xs tracking-widest text-wood uppercase">The Finding</p>
+          <h2 className="mt-4 max-w-2xl text-3xl">{project.keyFinding.summary}</h2>
+          <div className="mt-4 h-px w-6 bg-stone" />
+          <ol className="mt-8 space-y-6">
+            {project.keyFinding.points.map((point, i) => (
+              <li key={i} className="flex gap-4 text-wood">
+                <span className="shrink-0 font-mono text-sm text-wood-dark">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ol>
         </section>
       )}
 

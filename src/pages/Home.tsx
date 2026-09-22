@@ -46,19 +46,20 @@ function Home() {
       <section className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
         <div>
           <p className="font-mono text-xs tracking-widest text-wood uppercase">
-            Cybersecurity / Engineering / Impact
+            Application Security / DevSecOps / Engineering
           </p>
           <h1 className="mt-4 text-5xl md:text-6xl">Parit Vorasaran</h1>
           <p className="mt-3 text-lg text-wood-dark">
-            Cyber Security Analyst &amp; Application Security Engineer
+            Aspiring Cyber Security Analyst |  Application Security &amp; DevSecOps
           </p>
           <div className="my-6 h-px w-10 bg-stone" />
           <p className="font-serif text-3xl leading-tight text-ink md:text-4xl">
             I break, defend, and build software.
           </p>
           <p className="mt-4 max-w-md text-wood">
-            Turning security insight into better engineering through curiosity,
-            analysis and practical solutions.
+            3+ years in software engineering and technical support, now backed by a
+            Master of Cyber Security. Turning that background into practical
+            application security and DevSecOps work, one project at a time.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to="/projects" className="bg-ink px-5 py-2.5 text-paper">
