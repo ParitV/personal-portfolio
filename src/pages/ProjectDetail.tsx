@@ -205,6 +205,16 @@ function ProjectDetail() {
                 Live Demo ↓
               </a>
             )}
+            {project.docUrl && (
+              <a
+                href={project.docUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="border border-wood-dark px-5 py-2.5 text-ink hover:bg-stone/40"
+              >
+                Technical Report ↗
+              </a>
+            )}
           </div>
 
           {project.role && project.date && project.type && (
@@ -326,6 +336,24 @@ function ProjectDetail() {
               <div key={card.mitreId} className="border border-stone p-6">
                 <p className="font-mono text-xs tracking-widest text-wood uppercase">
                   {card.mitreId}
+                </p>
+                <h3 className="mt-2 text-xl">{card.title}</h3>
+                <p className="mt-3 text-wood">{card.detail}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {project.featureCards && (
+        <section className="mt-20 border-t border-stone pt-12">
+          <h2 className="text-3xl">{project.featureCardsTitle ?? 'Highlights'}</h2>
+          <div className="mt-2 h-px w-6 bg-stone" />
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {project.featureCards.map((card) => (
+              <div key={card.title} className="border border-stone p-6">
+                <p className="font-mono text-xs tracking-widest text-wood uppercase">
+                  {card.label}
                 </p>
                 <h3 className="mt-2 text-xl">{card.title}</h3>
                 <p className="mt-3 text-wood">{card.detail}</p>

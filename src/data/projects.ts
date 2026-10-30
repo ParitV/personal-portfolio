@@ -29,6 +29,12 @@ export type Project = {
     title: string
     detail: string
   }[]
+  featureCardsTitle?: string
+  featureCards?: {
+    label: string
+    title: string
+    detail: string
+  }[]
   skillsDemonstrated?: string[]
 }
 
@@ -36,7 +42,7 @@ export const projects: Project[] = [
   {
     slug: 'eight',
     title: 'Eight',
-    coverImage: '../../public/image/Eight.jpeg', 
+    coverImage: '/image/Eight.jpeg', 
     oneLiner:
       'An automated SAST/DAST security pipeline that scans every pull request and blocks merges on high-severity findings.',
     techStack: ['CodeQL', 'Semgrep', 'OWASP ZAP', 'GitHub Actions'],
@@ -63,7 +69,7 @@ export const projects: Project[] = [
   {
     slug: 'soc-siem-lab',
     title: 'Home SOC / SIEM Detection Lab',
-    coverImage: '../../public/image/SIEM_Lab.jpeg',
+    coverImage: '/image/SIEM_Lab.jpeg',
     oneLiner:
       'Built a home lab with Wazuh SIEM and Sysmon, simulated 4 MITRE ATT&CK techniques, and closed a real detection gap in a built-in SIEM rule with custom detection rules I engineered and debugged myself.',
     techStack: ['Wazuh', 'Sysmon', 'MITRE ATT&CK', 'Docker', 'VirtualBox', 'Windows Event Logs'],
@@ -130,5 +136,98 @@ export const projects: Project[] = [
       'Evidence-based investigation',
     ],
     repoUrl: 'https://github.com/ParitV/soc-siem-detection-lab',
+  },
+  {
+    slug: 'tryhackfree',
+    title: 'TryHackFree',
+    coverImage: '/image/TryHackFree.png',
+    oneLiner:
+      'A self-hosted, TryHackMe-style AppSec training platform with disposable isolated labs, a browser-based Linux AttackBox, and an exploit-then-fix-it teaching loop.',
+    techStack: [
+      'FastAPI',
+      'React 19',
+      'TypeScript',
+      'Docker',
+      'PostgreSQL',
+      'Redis',
+      'xterm.js',
+      'noVNC',
+      'Playwright',
+      'GitHub Actions',
+    ],
+    role: 'Architecture & Development',
+    date: 'Jul 2026 – Oct 2026',
+    type: 'Personal Project',
+    problem:
+      'Platforms like TryHackMe and HackTheBox are good for practising exploitation, but you never control the infrastructure and cannot see how the isolation actually works. TryHackFree is the build-the-AttackBox-platform-yourself version: browse labs, launch one, attack it, submit a flag, reset — all running on a single machine via Docker. Because the labs are deliberately vulnerable, the real engineering problem is not the vulnerable code, it is containment: proving a fully compromised container can never reach the host, another lab, or the trusted platform around it.',
+    whatIBuilt:
+      'A single-user platform where each lab instance gets its own internal Docker network, a browser-based attacker workstation, and one or more vulnerable targets. Thirteen labs cover SQL injection, XSS, SSRF, path traversal, file upload and XXE, API BOLA, JWT and mass assignment, auth flaws, and DevSecOps issues. One lab goes further with Exploit → Fix → Verify: the learner edits the actual vulnerable source file in the browser, the platform rebuilds the target with that patch, and a one-shot verifier must prove both that the exploit is now blocked and that legitimate use still works.',
+    impact: [
+      '13 labs across web, API, auth and DevSecOps, each with a fresh random flag per instance',
+      '~250 automated tests, including ~46 Docker integration tests that probe isolation against real containers',
+      '6 required CI jobs, with a static test that fails the build if anyone adds a soft-failure escape hatch',
+      'One-command install and uninstall, producing a stack bound to 127.0.0.1 with the API never directly exposed',
+    ],
+    myRole:
+      'Solo project, built end to end: architecture, backend, frontend, the Docker and network isolation design, the lab content including the vulnerable target apps, the test suites, CI, and a 22-page technical report.',
+    keyDecisions: [
+      'Every lab instance runs on its own internal Docker network with no gateway, so it has no route to the internet, the host, or another lab: with deliberately vulnerable targets, isolation is the only control that still holds once the target is owned, so integration tests try to break out from inside a real container and must fail.',
+      'The backend reaches Docker only through a filtering socket proxy whose allow-list blocks exec, volumes and image builds: handing a web backend the raw Docker socket is equivalent to handing it root on the host, so even a compromised backend stays away from the most dangerous calls.',
+      'The browser terminal is a Docker attach to a TTY the AttackBox was created with, not exec, not SSH, not a terminal daemon inside the lab: that way no network path from a lab back into the platform ever has to exist in the first place.',
+      'Lab definitions are YAML but treated as untrusted input, parsed by a hardened loader with no arbitrary tags or alias bombs and validated against a strict schema: privileged mode, host networking, extra capabilities and bind mounts are simply not expressible in a lab file.',
+      'The scaling path — auth, quotas, multi-worker, separate Docker hosts — is documented but deliberately not implemented, and accepted risks are written down in a line-by-line security audit rather than hidden, to keep a single-user MVP honestly scoped.',
+    ],
+    architectureImage: '/image/tryhackfree-architecture.svg',
+    architectureNote:
+      'A trusted control plane (nginx, FastAPI, PostgreSQL, Redis) talks to the Docker Engine only through a filtering proxy, and creates the hostile data plane at runtime. Each lab instance is its own internal network holding an AttackBox and its targets, so lab A has no route to lab B, to the host, or to the internet.',
+    featureCardsTitle: 'Containment Model',
+    featureCards: [
+      {
+        label: 'Network',
+        title: 'Internal-only lab networks',
+        detail:
+          'Each instance gets a private Docker network with no gateway: no internet, no host, no other lab. Integration tests run real break-out probes from inside a container and fail the build if any of them succeed.',
+      },
+      {
+        label: 'Docker API',
+        title: 'Filtering socket proxy',
+        detail:
+          'The backend never touches the Docker socket. An allow-listing proxy exposes only the endpoints the orchestrator needs and blocks exec, volume and image-build calls, so a compromised backend still cannot pivot to the host.',
+      },
+      {
+        label: 'Terminal',
+        title: 'Attach, not exec',
+        detail:
+          'The browser terminal attaches to a TTY the AttackBox was created with, relayed over a WebSocket with single-use tickets. The full XFCE desktop is reached the same way over noVNC, through an internal gateway network that never publishes a port.',
+      },
+      {
+        label: 'Lab files',
+        title: 'YAML as untrusted input',
+        detail:
+          'A hardened loader (no arbitrary tags, no alias bombs) plus a strict schema that rejects anything not explicitly allowed. Privileged mode, host networking, extra capabilities and bind mounts cannot be expressed in a lab definition at all.',
+      },
+    ],
+    keyFinding: {
+      summary:
+        'Exploit → Fix → Verify: the learner patches the real vulnerable source file, and the platform proves the patch actually holds.',
+      points: [
+        'Most vulnerable-app projects stop at the exploit. Here, once the flag is captured on the authorization lab, the learner opens a Fix tab and edits the actual source file that makes the authorization decision, in the browser.',
+        'The platform rebuilds the target container with that patch and runs a hardened, one-shot verifier against the fresh instance. The verifier is throwaway and has no standing access to the lab.',
+        'A fix only counts if both halves pass: the original exploit must now be blocked, and legitimate use must still work. Patching by breaking the feature fails the check, which is the lesson the loop exists to teach.',
+      ],
+    },
+    skillsDemonstrated: [
+      'Container isolation and Docker network design',
+      'Threat modelling a deliberately hostile workload',
+      'Secure API design (FastAPI, Pydantic validation)',
+      'Untrusted input parsing and schema hardening',
+      'WebSocket relays and session ticketing',
+      'Integration testing against live containers',
+      'CI/CD pipeline design and enforcement',
+      'Security requirement tracing and documented risk acceptance',
+      'Technical writing for a non-infra audience',
+    ],
+    repoUrl: 'https://github.com/ParitV/TryHackFree',
+    docUrl: '/TryHackFree-Technical-Report.pdf',
   },
 ]
